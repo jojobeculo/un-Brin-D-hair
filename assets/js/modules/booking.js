@@ -412,11 +412,16 @@ export function initBooking() {
     ui.form.reset();
     resetErrors(ui.form);
     dialog.showModal();
-    // Le bouton « retour » du téléphone ferme le tunnel au lieu de quitter le site.
-    history.pushState({ booking: true }, '');
     const service = services.get(serviceId);
     if (service?.category.bookable) choose(service);
     else go('1', { remember: false });
+    // Le bouton « retour » du téléphone ferme le tunnel au lieu de quitter le site.
+    // Dans une iframe isolée (origine opaque), pushState échoue : le tunnel fonctionne alors sans.
+    try {
+      history.pushState({ booking: true }, '');
+    } catch {
+      // La croix et la touche Échap ferment toujours le tunnel.
+    }
   }
 
   document.addEventListener('click', (event) => {

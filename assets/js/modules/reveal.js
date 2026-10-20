@@ -93,6 +93,6 @@ export function initReveal() {
       if (entry.target.dataset.count) countUp(entry.target);
       observer.unobserve(entry.target);
     });
-  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+  }, { rootMargin: '0px 0px -4% 0px', threshold: 0 });
   targets.forEach((element) => observer.observe(element));
 }

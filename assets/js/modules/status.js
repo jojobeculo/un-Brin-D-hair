@@ -34,4 +34,8 @@ export function initStatus() {
 
   update();
   setInterval(update, 60_000);
+
+  // Un lien du panneau des horaires ferme le panneau (utile quand il mène à une section de la page en cours).
+  const panel = document.getElementById('horaires');
+  panel?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => panel.hidePopover?.()));
 }

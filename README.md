@@ -41,7 +41,9 @@ Sur chaque page :
 | Titre « Un Brun d’Hair » dessiné au trait puis rempli | Accueil | `assets/css/site.css` |
 | Titres révélés mot à mot, mots en italique soulignés | Toutes les pages | `assets/js/modules/reveal.js` |
 | Phrase qui s’éclaire mot à mot au défilement | Accueil | `reveal.js` |
-| Fond qui glisse progressivement du lin à l’expresso au défilement | Réservation, questionnaire, boutique, bandeaux finaux | `assets/js/modules/ambient.js` |
+| Sections sombres avec un long dégradé lin → expresso en entrée et en sortie (le texte reste toujours sur une couleur pleine) ; l’en-tête passe en sombre au-dessus d’elles | Réservation, questionnaire, boutique, bandeaux finaux | `site.css`, `assets/js/modules/ambient.js` |
+| Poussière dorée qui dérive en fond et s’écarte de la souris ou du doigt | Toutes les pages | `assets/js/modules/particles.js` |
+| Position à l’arrivée (en haut, ou sur la section demandée), retour arrière qui rend la position, défilement doux vers les sections de la page | Toutes les pages | `assets/js/modules/scroll.js` |
 | Ruban organique, orbes de lumière, parallaxe | Accueil, Qui suis-je, questionnaire, réservation | `ambient.js`, `motion.js`, `fx.js` |
 | Plan du quartier qui se dessine, trajets à pied animés | Accueil, Contact | `assets/js/modules/plan.js` |
 | Avant / après à glisser (aller-retour de démonstration à l’apparition) | Accueil, Réalisations, Coupe femme, Coloration, Balayage | `assets/js/modules/compare.js` |

@@ -18,13 +18,22 @@ export function initQuiz() {
   const products = new Map(quiz.products.map((product) => [product.id, product]));
   let answers = {};
   let index = 0;
+  let started = false;
 
   const swap = (markup, focusSelector) => {
     stage.classList.remove('is-entering');
     stage.innerHTML = markup;
     // Relance l’animation d’entrée à chaque écran.
     requestAnimationFrame(() => stage.classList.add('is-entering'));
+    // Au chargement, le focus reste en haut de page ; ensuite il suit le questionnaire,
+    // et l’écran remonte sur la question si elle est sortie du champ (téléphone).
+    if (!started) {
+      started = true;
+      return;
+    }
     stage.querySelector(focusSelector)?.focus({ preventScroll: true });
+    const top = stage.getBoundingClientRect().top;
+    if (top < 0 || top > innerHeight * 0.6) scrollBy({ top: top - 96, behavior: 'smooth' });
   };
 
   function renderQuestion() {
@@ -32,11 +41,13 @@ export function initQuiz() {
     const question = list[index];
     const options = question.options(answers);
     const progress = Math.round((index / list.length) * 100);
-    live.textContent = `Question ${index + 1} sur ${list.length}`;
+    // Le nombre total dépend de la première réponse (femme, homme ou enfant) : il s’affiche ensuite.
+    const total = answers.pour ? ` sur ${list.length}` : '';
+    live.textContent = `Question ${index + 1}${total}`;
     swap(`
       <div class="quiz__top">
-        <button class="quiz__back" type="button" data-back ${index ? '' : 'hidden'}>← Retour</button>
-        <p class="quiz__count">Question ${index + 1} <span>/ ${list.length}</span></p>
+        <button class="quiz__back" type="button" data-back${index ? '' : ' disabled'}>← Retour</button>
+        <p class="quiz__count">Question ${index + 1}${answers.pour ? ` <span>/ ${list.length}</span>` : ''}</p>
       </div>
       <div class="quiz__bar" aria-hidden="true"><span style="width:${progress}%"></span></div>
       <h3 class="quiz__question" tabindex="-1">${escapeHtml(question.title)}</h3>

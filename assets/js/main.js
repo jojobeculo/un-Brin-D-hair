@@ -1,3 +1,4 @@
+import { initScroll } from './modules/scroll.js';
 import { initMotion } from './modules/motion.js';
 import { initMenu } from './modules/menu.js';
 import { initStatus } from './modules/status.js';
@@ -11,9 +12,10 @@ import { initCompare } from './modules/compare.js';
 import { initRibbonLive } from './modules/ribbon-live.js';
 import { initMotionToggle } from './modules/motion-toggle.js';
 import { initDecor } from './modules/decor.js';
+import { initParticles } from './modules/particles.js';
 
 // Chaque module démarre seul : une erreur dans l’un n’empêche pas les autres de fonctionner.
-[initMotion, initAmbient, initMenu, initStatus, initReveal, initPlan, initCartBadge, initFlash, initContact, initCompare, initRibbonLive, initMotionToggle, initDecor].forEach((init) => {
+[initScroll, initMotion, initAmbient, initMenu, initStatus, initReveal, initPlan, initCartBadge, initFlash, initContact, initCompare, initRibbonLive, initMotionToggle, initDecor, initParticles].forEach((init) => {
   try {
     init();
   } catch (error) {

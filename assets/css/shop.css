@@ -9,7 +9,6 @@
   --fg: var(--expresso); --fg-soft: var(--muted); --accent: var(--brun); --rule: var(--line); --btn-bg: var(--brun); --btn-fg: var(--creme);
   scroll-margin-top: calc(var(--header) + 2rem);
 }
-.product[hidden] { display: none; }
 @media (width < 640px) {
   .shop__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
   .product { padding: 0.6rem 0.6rem 0.9rem; }

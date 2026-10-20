@@ -1,4 +1,5 @@
 import { calm } from '../lib/motion-pref.js';
+import { keepScrollOnReload } from './scroll.js';
 
 // Interrupteur « Animations complètes » : garde le choix du visiteur pour tout le site, puis recharge la page.
 export function initMotionToggle() {
@@ -11,6 +12,7 @@ export function initMotionToggle() {
         // Stockage bloqué : le choix vaut pour cette page seulement.
       }
       document.documentElement.dataset.motion = calm() ? 'full' : 'calm';
+      keepScrollOnReload();
       location.reload();
     });
   });

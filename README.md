@@ -19,6 +19,7 @@ titres géants condensés, deux cercles de navigation aux coins de l’écran.
 - **Avant / après** : comparateurs à glisser (illustrations provisoires, voir plus bas).
 - **Carte cadeau** : achat en ligne sur Planity, compte à rebours avant la prochaine fête.
 - **Venir au salon** : plan interactif, Google Maps, Waze, Plans, horaires.
+- **Curseur personnalisé** (souris uniquement) : un point et un anneau qui s’agrandit sur les éléments cliquables. Il est géré par `assets/js/modules/cursor.js` et la fin de `components.css`.
 
 ## Lancer le site en local
 

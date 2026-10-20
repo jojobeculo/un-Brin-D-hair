@@ -1369,3 +1369,185 @@
   padding-top: 0;
   border-top: 0;
 }
+
+/* =========================================================
+   Mouvement
+   Tout est désactivé si le visiteur a demandé moins d’animations
+   (règle prefers-reduced-motion de base.css, et blocs no-preference ci-dessous).
+   ========================================================= */
+
+/* Hero : les lettres montent une à une (découpage par modules/motion.js). */
+.hero__title.is-split .line {
+  animation: none;
+}
+
+.hero__title.is-split .split-char {
+  animation: char-rise 1s var(--ease-out) both;
+  animation-delay: calc(0.1s + var(--i) * 0.05s);
+}
+
+@keyframes char-rise {
+  from {
+    opacity: 0;
+    transform: translateY(55%) rotate(10deg);
+  }
+}
+
+/* Pied de page : la signature géante se lève lettre par lettre à son arrivée. */
+.footer__mark.is-split .split-char {
+  opacity: 0;
+  transform: translateY(70%);
+  transition: opacity 0.6s var(--ease-out), transform 1s var(--ease-out);
+  transition-delay: calc(var(--i) * 40ms);
+}
+
+.footer__mark.is-split.is-in .split-char {
+  opacity: 1;
+  transform: none;
+}
+
+/* Galerie : chaque photo se dévoile de bas en haut, puis la poignée fait un aller-retour
+   pour montrer qu’on peut la glisser. --pos est déclarée pour pouvoir être animée. */
+@property --pos {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+
+.js.is-ready .compare .compare__frame {
+  transition: clip-path 1.2s var(--ease-out);
+}
+
+.js.is-ready .compare:not(.is-in) .compare__frame {
+  clip-path: inset(100% 0 0 0);
+}
+
+.compare__img {
+  transition: transform 1.6s var(--ease-out);
+}
+
+.js.is-ready .compare:not(.is-in) .compare__img {
+  transform: scale(1.15);
+}
+
+.compare.is-in:not(.is-touched) .compare__frame {
+  animation: compare-hint 2.2s 1s var(--ease-out) backwards;
+}
+
+@keyframes compare-hint {
+  0% { --pos: 50%; }
+  30% { --pos: 28%; }
+  65% { --pos: 70%; }
+  100% { --pos: 50%; }
+}
+
+/* Avis : les étoiles s’allument l’une après l’autre. */
+.js.is-ready .avis__score:not(.is-in) .stars svg {
+  opacity: 0;
+  transform: scale(0.3) rotate(-40deg);
+}
+
+.avis__score .stars svg {
+  transition: opacity 0.4s, transform 0.6s var(--ease-spring);
+}
+
+.avis__score .stars svg:nth-child(1) { transition-delay: 0.5s; }
+.avis__score .stars svg:nth-child(2) { transition-delay: 0.58s; }
+.avis__score .stars svg:nth-child(3) { transition-delay: 0.66s; }
+.avis__score .stars svg:nth-child(4) { transition-delay: 0.74s; }
+.avis__score .stars svg:nth-child(5) { transition-delay: 0.82s; }
+
+/* Éclair de l’alerte : un scintillement bref, de temps en temps. */
+.flash__bolt {
+  animation: zap 5s infinite;
+}
+
+@keyframes zap {
+  0%, 84%, 100% { opacity: 1; }
+  86% { opacity: 0.15; }
+  88% { opacity: 1; }
+  90% { opacity: 0.3; }
+  92% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Carte cadeau : elle flotte doucement. */
+  .giftcard {
+    animation: card-float 7s ease-in-out infinite;
+  }
+}
+
+@keyframes card-float {
+  50% {
+    translate: 0 -12px;
+  }
+}
+
+/* Animations liées au défilement (Chrome, Edge, Safari récents ; ailleurs, la page reste fixe). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Hero : les deux lignes du titre s’écartent quand on descend. */
+    .hero__title.is-split .line {
+      animation: hero-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+
+    .hero__title.is-split .line + .line {
+      animation-name: hero-drift-reverse;
+    }
+
+    /* Titres de section : les lignes glissent en place en entrant dans l’écran. */
+    main .section .display .line {
+      animation: title-in linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+
+    main .section .display .line:nth-child(even) {
+      animation-name: title-in-reverse;
+    }
+
+    /* Lignes de tarifs et listes : elles entrent en cascade, au rythme du défilement. */
+    .row,
+    .words li,
+    .ticks li,
+    .gift__ideas li,
+    .subscores div {
+      animation: row-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+
+@keyframes hero-drift {
+  to {
+    translate: -12% 0;
+  }
+}
+
+@keyframes hero-drift-reverse {
+  to {
+    translate: 8% 0;
+  }
+}
+
+@keyframes title-in {
+  from {
+    translate: -6% 0;
+  }
+}
+
+@keyframes title-in-reverse {
+  from {
+    translate: 10% 0;
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}

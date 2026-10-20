@@ -231,7 +231,7 @@ mark {
 
 /* ---------- Apparition au défilement ---------- */
 
-.js [data-reveal]:not([data-reveal="lines"]) {
+.js [data-reveal]:not([data-reveal="lines"], [data-reveal="chars"]) {
   opacity: 0;
   transform: translateY(32px);
   transition: opacity 0.8s var(--ease-out), transform 0.9s var(--ease-out);
@@ -256,6 +256,16 @@ mark {
 
 .js [data-reveal="lines"].is-in .line:nth-child(3) {
   transition-delay: 0.18s;
+}
+
+/* Titres découpés en lettres par modules/motion.js */
+.split-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.split-char {
+  display: inline-block;
 }
 
 /* Filet de sécurité : si les scripts ne se chargent pas, le contenu apparaît quand même. */

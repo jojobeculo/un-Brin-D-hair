@@ -190,9 +190,10 @@ export function initBooking() {
     const category = categories.find((item) => item.id === state.tab);
     tabButtons.forEach((button, index) => button.setAttribute('aria-pressed', String(categories[index] === category)));
 
-    ui.choices.replaceChildren(...category.services.map((service) => {
+    ui.choices.replaceChildren(...category.services.map((service, index) => {
       const button = el('button', 'choice');
       button.type = 'button';
+      button.style.setProperty('--n', index);
       button.setAttribute('aria-pressed', String(state.service === service));
       const price = el('span', 'choice__price');
       if (service.from) price.append(el('small', '', 'dès'));
@@ -262,8 +263,9 @@ export function initBooking() {
     renderGate();
     const options = state.service.category.options.map((id) => services.get(id)).filter(Boolean);
     ui.options.hidden = !options.length;
-    ui.optionsList.replaceChildren(...options.map((option) => {
+    ui.optionsList.replaceChildren(...options.map((option, index) => {
       const label = el('label', 'option');
+      label.style.setProperty('--n', index);
       const input = el('input');
       input.type = 'checkbox';
       input.checked = state.options.has(option.id);
@@ -294,9 +296,10 @@ export function initBooking() {
       state.day = days.find((day) => slotsFor(day, hours, duration, now).length) || days[0];
     }
 
-    const buttons = days.map((day) => {
+    const buttons = days.map((day, index) => {
       const button = el('button', 'day');
       button.type = 'button';
+      button.style.setProperty('--n', index);
       button.append(
         el('span', 'day__dow', day.isToday ? 'Auj.' : shortWeekday.format(day.date)),
         ' ',
@@ -328,9 +331,10 @@ export function initBooking() {
       state.time = time;
       go('4');
     };
-    const buttons = slots.map((time) => {
+    const buttons = slots.map((time, index) => {
       const button = el('button', 'slot', formatTime(time));
       button.type = 'button';
+      button.style.setProperty('--n', index);
       button.setAttribute('aria-pressed', String(state.time === time));
       button.addEventListener('click', () => pick(time));
       return button;

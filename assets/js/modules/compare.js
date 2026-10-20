@@ -15,10 +15,14 @@ export function initCompare() {
     };
     const stop = () => figure.classList.remove('is-dragging');
 
-    range.addEventListener('input', () => set(Number(range.value)));
+    range.addEventListener('input', () => {
+      figure.classList.add('is-touched');
+      set(Number(range.value));
+    });
     frame.addEventListener('pointerdown', (event) => {
       frame.setPointerCapture(event.pointerId);
-      figure.classList.add('is-dragging');
+      // Stoppe l’aller-retour de démonstration : la main revient au visiteur.
+      figure.classList.add('is-dragging', 'is-touched');
       // Au doigt, on attend le glissement : un simple appui peut être le début d’un défilement.
       if (event.pointerType === 'mouse') follow(event);
     });

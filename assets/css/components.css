@@ -42,6 +42,34 @@
   height: 22px;
 }
 
+/* Anneau de progression de lecture autour du cercle de droite (navigateurs compatibles). */
+@property --progress {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@supports (animation-timeline: scroll()) {
+  .corner--right::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: 50%;
+    background: conic-gradient(var(--magenta) calc(var(--progress) * 1turn), transparent 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    pointer-events: none;
+    animation: reading-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@keyframes reading-progress {
+  to {
+    --progress: 1;
+  }
+}
+
 .burger {
   display: grid;
   gap: 6px;
@@ -132,7 +160,13 @@
   padding: 0.7em 1.4em;
   border: 2px solid var(--ink);
   border-radius: 999px;
-  background: transparent;
+  /* Au survol, la couleur --sweep remplit le bouton de gauche à droite. */
+  --sweep: var(--blush);
+  background-color: transparent;
+  background-image: linear-gradient(var(--sweep), var(--sweep));
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 1rem;
@@ -141,11 +175,11 @@
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.25s;
+  transition: background-size 0.45s var(--ease-out), color 0.25s, border-color 0.25s, transform 0.25s;
 }
 
 .btn:hover {
-  background: var(--blush);
+  background-size: 100% 100%;
 }
 
 .btn:active {
@@ -154,26 +188,27 @@
 
 /* Texte blanc sur magenta : 19 px gras minimum (grand texte, contraste 3,98:1). */
 .btn--solid {
+  --sweep: var(--ink);
   border-color: var(--magenta);
-  background: var(--magenta);
+  background-color: var(--magenta);
   color: var(--chalk);
   font-size: 1.1875rem;
 }
 
 .btn--solid:hover {
   border-color: var(--ink);
-  background: var(--ink);
 }
 
 .btn--ink {
+  --sweep: var(--magenta);
   border-color: var(--ink);
-  background: var(--ink);
+  background-color: var(--ink);
   color: var(--chalk);
+  font-size: 1.1875rem;
 }
 
 .btn--ink:hover {
-  background: var(--chalk);
-  color: var(--ink);
+  border-color: var(--magenta);
 }
 
 .btn--block {
@@ -342,6 +377,11 @@
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* --skew est réglé par modules/motion.js selon la vitesse de défilement. */
+.marquee__track span {
+  transform: skewX(var(--skew, 0deg));
 }
 
 .marquee__track span::after {
@@ -734,4 +774,120 @@ select.input {
   .menu__aside {
     max-width: 22rem;
   }
+}
+
+/* ---------- Curseur personnalisé (souris uniquement, voir modules/cursor.js) ---------- */
+
+html.has-cursor,
+html.has-cursor * {
+  cursor: none;
+}
+
+/* Les champs de texte gardent le curseur système : il faut voir où l’on tape. */
+html.has-cursor :is(input[type="text"], input[type="tel"], input[type="email"], textarea, select) {
+  cursor: auto;
+}
+
+.cursor {
+  --cursor-color: var(--ink);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  background: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.cursor.is-visible:not(.is-native) {
+  opacity: 1;
+}
+
+.cursor.is-light {
+  --cursor-color: var(--chalk);
+}
+
+.cursor__dot,
+.cursor__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.cursor__dot::before,
+.cursor__ring::before {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+.cursor__dot::before {
+  inset: -4px;
+  background: var(--cursor-color);
+  transition: transform 0.25s var(--ease-out);
+}
+
+.cursor__ring::before {
+  inset: -18px;
+  border: 1.5px solid var(--cursor-color);
+  transition: transform 0.35s var(--ease-spring), background-color 0.25s, border-color 0.25s;
+}
+
+.cursor.is-active .cursor__ring::before {
+  background: rgb(252 229 223 / 0.55);
+  transform: scale(1.9);
+}
+
+.cursor.is-active.is-light .cursor__ring::before {
+  background: rgb(255 248 246 / 0.18);
+}
+
+.cursor.is-active .cursor__dot::before {
+  transform: scale(0.5);
+}
+
+.cursor.is-pressed .cursor__ring::before {
+  transform: scale(0.75);
+}
+
+.cursor.is-active.is-pressed .cursor__ring::before {
+  transform: scale(1.5);
+}
+
+/* Étiquette du curseur (attribut data-cursor), par exemple « Glisser » sur les comparateurs. */
+.cursor__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--black);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s;
+}
+
+.cursor.has-label .cursor__label {
+  opacity: 1;
+}
+
+.cursor.has-label .cursor__ring::before {
+  border-color: var(--magenta);
+  background: var(--magenta);
+  transform: scale(2.5);
+}
+
+.cursor.has-label .cursor__dot::before {
+  transform: scale(0);
 }

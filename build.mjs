@@ -1,11 +1,12 @@
 // Génère les pages HTML du site à partir de src/ : `node build.mjs`.
 // Aucune dépendance : Node 18 ou plus suffit.
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { salon } from './src/data/salon.mjs';
 import { layout } from './src/components/layout.mjs';
 import { pages } from './src/pages/index.mjs';
+import { products } from './src/data/products.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
@@ -23,6 +24,11 @@ function context(route) {
 }
 
 const outputFile = (route) => (route.endsWith('.html') ? route : `${route}index.html`);
+
+// Anciennes adresses (avant la refonte) : supprimées pour ne pas laisser de pages en double.
+for (const old of ['salon', 'galerie', 'coiffeur-femme-aubiere', 'coiffeur-homme-aubiere', 'soins-capillaires-aubiere']) {
+  await rm(join(ROOT, old), { recursive: true, force: true });
+}
 
 const indexed = [];
 for (const { route, render } of pages) {
@@ -44,3 +50,8 @@ ${indexed.map((route) => `  <url><loc>${new URL(route, salon.siteUrl).href}</loc
 await writeFile(join(ROOT, 'sitemap.xml'), sitemap);
 await writeFile(join(ROOT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${new URL('sitemap.xml', salon.siteUrl).href}\n`);
 console.log(`✓ sitemap.xml (${indexed.length} pages), robots.txt`);
+
+// Catalogue de la fonction de paiement (stripe/) : les prix sont fixés côté serveur, en centimes.
+const stripeCatalog = Object.fromEntries(products.map(({ id, name, size, price }) => [id, { name: `${name} (${size})`, amount: Math.round(price * 100) }]));
+await writeFile(join(ROOT, 'stripe', 'catalog.js'), `// Généré par build.mjs à partir de src/data/products.mjs : ne pas modifier.\nexport default ${JSON.stringify(stripeCatalog, null, 2)};\n`);
+console.log(`✓ stripe/catalog.js (${products.length} produits)`);

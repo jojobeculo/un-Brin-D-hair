@@ -1,20 +1,32 @@
-import { readHours, openStatus, salonNow } from '../lib/hours.js';
+import { readSalonData } from '../lib/data.js';
+import { parseHours, openStatus, salonNow, isOpenWeek } from '../lib/hours.js';
 
-// « Ouvert · jusqu’à 19:00 » en direct, et la ligne du jour surlignée dans le tableau des horaires.
+// « Ouvert · jusqu’à 19 h » en direct, la ligne du jour dans le tableau des horaires,
+// et la semaine en cours pour le lundi et le samedi (une semaine sur deux).
 export function initStatus() {
-  const hours = readHours();
+  const data = readSalonData();
+  const hours = parseHours(data.hours);
   if (!hours.size) return;
+  const reference = data.alternateOpenWeek;
   const labels = document.querySelectorAll('[data-open-status]');
   const rows = document.querySelectorAll('[data-hours] [data-day]');
+  const week = document.querySelectorAll('[data-alt-week]');
 
   const update = () => {
     const now = salonNow();
-    const { open, label } = openStatus(hours, now);
+    const { state, label } = openStatus(hours, now, reference);
     labels.forEach((element) => {
       element.textContent = label;
-      element.dataset.state = open ? 'open' : 'closed';
+      element.dataset.state = state;
     });
     rows.forEach((row) => row.classList.toggle('is-today', Number(row.dataset.day) === now.weekday));
+    const open = isOpenWeek(now.date, reference);
+    if (open !== null) {
+      const text = open ? 'Cette semaine, le salon ouvre lundi et samedi.' : 'Cette semaine, le salon est fermé lundi et samedi.';
+      week.forEach((element) => {
+        element.textContent = text;
+      });
+    }
   };
 
   update();

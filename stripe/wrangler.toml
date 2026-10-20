@@ -1,0 +1,8 @@
+# Fonction de paiement de la boutique : voir stripe/README.md.
+name = "un-brun-dhair-paiement"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+SITE_URL = "https://jojobeculo.github.io/un-Brin-D-hair/"
+ALLOWED_ORIGINS = "https://jojobeculo.github.io"

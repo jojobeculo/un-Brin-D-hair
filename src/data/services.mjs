@@ -3,7 +3,7 @@ import { formatDuration, formatPrice } from '../../assets/js/lib/format.js';
 // Carte des prestations. Durées en minutes, prix en euros TTC.
 // `from: true` affiche « dès » : le prix s’ajuste à la chevelure et au projet.
 // `len` choisit le pictogramme de longueur : courts, milongs ou longs.
-// `name` est le libellé complet affiché dans le tunnel de réservation.
+// `name` est le libellé complet de la prestation (questionnaire, données structurées).
 
 export const categories = [
   {
@@ -24,7 +24,7 @@ export const categories = [
   {
     id: 'femme',
     label: 'Femme',
-    page: 'coiffeur-femme-aubiere/',
+    page: 'coupe-femme-aubiere/',
     title: 'Coupes & brushings',
     titleAccent: 'Femme',
     description: 'Diagnostic et conseils personnalisés à chaque rendez-vous. Pour prolonger ce moment, ajoutez le soin Davines adapté à vos cheveux.',
@@ -109,7 +109,7 @@ export const categories = [
   {
     id: 'homme',
     label: 'Homme',
-    page: 'coiffeur-homme-aubiere/',
+    page: 'coupe-homme-aubiere/',
     title: 'Coupe',
     titleAccent: 'Homme',
     description: 'Une prestation personnalisée, pour une coupe adaptée à vos envies.',
@@ -124,7 +124,7 @@ export const categories = [
   {
     id: 'enfant',
     label: 'Enfants',
-    page: 'coiffeur-homme-aubiere/',
+    page: 'coupe-homme-aubiere/',
     anchor: 'enfants',
     title: 'Enfants',
     titleAccent: '−12 ans',
@@ -142,7 +142,7 @@ export const categories = [
   {
     id: 'soin',
     label: 'Soins',
-    page: 'soins-capillaires-aubiere/',
+    page: 'soin-capillaire-aubiere/',
     title: 'La carte',
     titleAccent: 'des soins',
     description: 'Le soin Davines adapté aux besoins de vos cheveux. Bientôt : des rituels capillaires personnalisés pour prolonger votre moment de bien-être.',
@@ -159,7 +159,7 @@ export const categories = [
     label: 'En plus',
     title: 'Les petits trucs',
     titleAccent: 'en plus',
-    description: 'À ajouter à votre réservation, à l’étape 2 : on prévoit ainsi le temps qu’il faut pour vous et pour votre chevelure.',
+    description: 'À ajouter à votre réservation sur Planity : on prévoit ainsi le temps qu’il faut pour vous et pour votre chevelure.',
     bookable: false,
     groups: [
       {
@@ -191,15 +191,7 @@ export function startingPrice(id, groupIndex) {
   return formatPrice(min, items.length > 1 || items.some((item) => item.from));
 }
 
-// Données du tunnel de réservation, intégrées en JSON dans chaque page.
-export function bookingData() {
-  return categories.map((item) => ({
-    id: item.id,
-    label: item.label,
-    options: item.options || [],
-    gate: item.gate || '',
-    featured: Boolean(item.featured),
-    bookable: item.bookable !== false,
-    services: item.groups.flatMap((group) => group.services).map(({ id, name, hint, duration, price, from }) => ({ id, name, hint: hint || '', duration, price, from: Boolean(from) })),
-  }));
+// Prestations réservables, intégrées en JSON dans les pages qui calculent un prix (questionnaire).
+export function servicesData() {
+  return allServices.map(({ id, name, duration, price, from }) => ({ id, name, duration, price, from: Boolean(from) }));
 }

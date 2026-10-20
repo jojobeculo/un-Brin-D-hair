@@ -1,127 +1,157 @@
-import { html } from '../lib/html.mjs';
+import { html, raw } from '../lib/html.mjs';
 import { salon } from '../data/salon.mjs';
-import { reviewsFor, reviewWords } from '../data/reviews.mjs';
+import { reviewsFor } from '../data/reviews.mjs';
+import { haircuts } from '../data/haircuts.mjs';
+import { haircutSvg } from '../../assets/js/lib/haircut-art.js';
 import { icon } from '../components/icons.mjs';
 import { hairSalonSchema } from '../components/layout.mjs';
 import {
-  kicker, displayTitle, circleLink, phoneLink, servicesList, rating, quotes, reviewLinks, hoursSentence,
-  gallery, GALLERY, flash, gift, visit, faq, faqSchema, marquee, social, stars,
+  kicker, photo, bookButton, ribbon, orbs, wave, serviceCards, shots, SHOTS, rating, quotes, reviewLinks, instagram, visit, phoneLink, stars,
 } from '../components/blocks.mjs';
-import { priceOf, durationOf } from '../data/services.mjs';
 
 export const route = '';
 
-const FAQ = [
-  { q: 'Comment prendre rendez-vous ?', a: `En ligne sur Planity, à toute heure, ou en 3 clics depuis ce site. Vous pouvez aussi appeler le salon au ${salon.phone.display}.` },
-  { q: 'Le diagnostic est-il obligatoire ?', a: `Oui, avant tout balayage ou changement de couleur nécessitant un éclaircissement. Il dure ${durationOf('diagnostic')} et coûte ${priceOf('diagnostic')}, déduits de votre prestation si vous convenez ensemble d’un rendez-vous. Il ne peut pas avoir lieu le même jour que la prestation.` },
-  { q: 'Quels produits utilisez-vous ?', a: 'Le salon travaille exclusivement avec Davines, une marque engagée dans une démarche de beauté durable : prendre soin de vos cheveux tout en respectant l’environnement.' },
-  { q: 'Quels sont les horaires du salon ?', a: `${hoursSentence()}. ${salon.hoursNote}` },
-  { q: 'Coiffez-vous les hommes et les enfants ?', a: `Oui : forfait homme (shampoing, coupe, coiffage) à ${priceOf('homme-forfait')}, coupe garçon de moins de 12 ans à ${priceOf('enfant-garcon')}, coupe fille de moins de 12 ans dès ${priceOf('enfant-fille-courts')}.` },
-  { q: 'Quels moyens de paiement acceptez-vous ?', a: 'La carte bancaire et les espèces.' },
-];
-
 const WHY = [
-  { word: 'Diagnostic', title: 'Le diagnostic d’abord', text: 'Vos envies, votre historique capillaire, vos habitudes : on en parle avant de commencer. Pour un balayage ou un éclaircissement, cette consultation est même obligatoire.' },
-  { word: 'Davines', title: 'Une marque engagée', text: 'Le salon travaille exclusivement avec Davines, qui allie performance, respect du cheveu et respect de l’environnement.' },
-  { word: 'Sandy', title: 'Une seule coiffeuse', text: 'Dans ce salon intimiste, c’est Sandy qui vous accueille, vous conseille et vous coiffe, de votre arrivée à votre départ.' },
-  { word: salon.rating.value, title: 'Une note parfaite', text: `${salon.rating.value} sur 5 sur ${salon.rating.planityCount} avis Planity : les clientes et clients parlent d’écoute, de conseils et d’une vraie bulle de douceur.` },
+  { num: '15', unit: 'min', title: 'Le diagnostic d’abord', text: 'Vos envies, votre historique, vos habitudes : on en parle avant de commencer, pour un projet réaliste.' },
+  { num: '1', unit: 'coiffeuse', title: 'Une seule interlocutrice', text: 'C’est Sandy qui vous accueille, vous conseille et vous coiffe, de votre arrivée à votre départ.' },
+  { num: '100', unit: '%', title: 'Davines, et rien d’autre', text: 'Une marque engagée, qui allie performance, respect du cheveu et de l’environnement.' },
+  { num: salon.rating.value, unit: '/5', title: 'Des clientes fidèles', text: `${salon.rating.planityCount} avis sur Planity : on y parle d’écoute, de conseils et d’une vraie bulle de douceur.` },
 ];
 
 export default function accueil(ctx) {
+  const teaser = haircuts.femme.find((cut) => cut.id === 'lob-rideau');
   const body = html`
-    <section id="top" class="hero" aria-labelledby="hero-title">
-      <div class="hero__top">
-        <p class="kicker"><a href="${ctx.rel('contact/')}">Salon de coiffure à ${salon.address.city}</a></p>
-        <p class="status-pill" data-open-status>Du lundi au samedi, sur rendez-vous</p>
-      </div>
-
-      <h1 id="hero-title" class="display hero__title">
-        <span class="visually-hidden">Un Brun d’Hair, salon de coiffure à Aubière</span>
-        <span class="line" aria-hidden="true"><span class="hero__word">Un</span> <span class="hero__word">Brun</span></span>
-        <span class="line hero__shift" aria-hidden="true">D’Hair</span>
-      </h1>
-
-      <div class="hero__bottom">
-        <p class="lead hero__lead">Coupes, couleurs et balayages sur-mesure, avec les soins Davines, dans un salon intimiste où l’on se sent <mark>comme à la maison</mark>.</p>
-        <div class="hero__actions" data-fab-hide>
-          ${circleLink({ id: 'ring-hero', ringText: 'RÉSERVER · EN 3 CLICS · RÉSERVER · EN 3 CLICS ·', label: 'Réserver en 3 clics', book: '' })}
-          <ul class="hero__links">
-            <li><a class="link-arrow" href="${ctx.rel('tarifs/')}">Voir les prestations ${icon('arrow-right')}</a></li>
-            <li>${phoneLink()}</li>
-            <li><a class="link-arrow" href="${salon.links.googleDirections}" target="_blank" rel="noopener" data-track="itineraire">${icon('navigation')} Itinéraire</a></li>
-          </ul>
+    <section class="hero" aria-labelledby="hero-title" data-hero>
+      ${orbs()}
+      ${ribbon('hero')}
+      <div class="hero__grid">
+        <div class="hero__text">
+          ${kicker('Salon de coiffure à Aubière')}
+          <h1 id="hero-title" class="hero__title">
+            <span class="visually-hidden">Un Brun d’Hair, salon de coiffure à Aubière</span>
+            <svg class="wordmark" viewBox="0 0 640 290" aria-hidden="true"><text x="2" y="122">Un Brun</text><text class="it" x="150" y="268">d’Hair</text></svg>
+          </h1>
+          <p class="hero__claim">Prendre soin de vos cheveux, <em>comme à la maison.</em></p>
+          <p class="lead hero__lead">Sandy vous accueille dans son salon du ${salon.address.street} : coupes, couleurs et balayages sur-mesure, avec les soins Davines.</p>
+          <div class="actions hero__actions">
+            ${bookButton('Je réserve')}
+            <a class="btn" href="#prestations" data-cursor="Explorer">Découvrir mes prestations ${icon('arrow-right', 'icon--move')}</a>
+          </div>
+          <div class="hero__proof">
+            <a href="${ctx.rel('avis/')}"><strong>${salon.rating.value}/5</strong> ${stars()} ${salon.rating.planityCount} avis Planity</a>
+            <span>${icon('leaf')} Produits Davines</span>
+          </div>
         </div>
-        <a class="rating-chip" href="${ctx.rel('avis/')}">
-          <span class="rating-chip__score">${salon.rating.value}</span>
-          ${stars()}
-          <span>${salon.rating.planityCount} avis Planity</span>
-        </a>
+        <div class="hero__media">
+          <span class="hero__monogram" aria-hidden="true">B</span>
+          <div class="arch" data-liquid data-cursor="Bonjour !">
+            ${photo(ctx, 'sandy-salon', { alt: 'Sandy devant la vitrine de son salon Un Brun d’Hair, rue Champvoisin à Aubière', sizes: '(min-width: 900px) 440px, 86vw', eager: true })}
+          </div>
+          <p class="hero__caption"><strong>Sandy</strong>Coiffeuse depuis ${salon.story.experienceYears} ans, à votre écoute</p>
+        </div>
       </div>
+      <span class="hero__scroll" aria-hidden="true"></span>
     </section>
 
-    ${marquee(['Coupe femme', 'Brushing', 'Couleur', 'Gloss', 'Balayage lumières & subtil', 'Balayage éclat & intense', 'Coupe homme', 'Coupe enfant', 'Soins Davines', 'Diagnostic'])}
+    <div class="band band--creme">
+      <section class="section statement" aria-label="Notre engagement">
+        ${wave()}
+        <p class="statement__text" data-words>Ici, on prend le temps : vous écouter, comprendre vos cheveux, et créer <em>une coupe qui vous ressemble.</em></p>
+        <p class="statement__sign">Sandy, fondatrice d’Un Brun d’Hair</p>
+      </section>
+    </div>
 
-    <section class="section why" aria-labelledby="why-title">
+    <section class="section" aria-labelledby="why-title">
       <header class="section__head">
-        ${kicker('Le salon')}
-        ${displayTitle(['Pourquoi', 'choisir', 'Un Brun d’Hair ?'], { id: 'why-title' })}
+        ${kicker('Pourquoi choisir le salon')}
+        <h2 id="why-title" data-split>Un salon <em>intimiste</em> et une coiffeuse attentive</h2>
       </header>
-      <ul class="why__list">
-        ${WHY.map((item) => html`<li class="why__item" data-reveal>
-          <p class="why__word" aria-hidden="true">${item.word}</p>
+      <ul class="why">
+        ${WHY.map((item, index) => html`<li data-reveal style="--stagger:${index}">
+          <p class="why__num" aria-hidden="true"><span data-count="${item.num.replace(',', '.')}">${item.num}</span><em>${item.unit}</em></p>
           <h3>${item.title}</h3>
           <p>${item.text}</p>
         </li>`)}
       </ul>
-      <p class="why__more" data-reveal><a class="link-arrow" href="${ctx.rel('salon/')}">Découvrir le salon et Sandy ${icon('arrow-right')}</a></p>
     </section>
 
-    ${servicesList(ctx)}
-
-    <section class="section avis" aria-labelledby="avis-title">
-      ${kicker('Avis & confiance')}
-      ${rating({ lines: ['Comme à', 'la maison.'] })}
-      <h3 class="visually-hidden">Ce qui revient dans les avis</h3>
-      <ul class="words">${reviewWords.map((word) => html`<li>${word}</li>`)}</ul>
-      ${quotes(reviewsFor('home'))}
-      <ul class="avis__links">
-        <li><a class="link-arrow" href="${ctx.rel('avis/')}">Lire tous les avis ${icon('arrow-right')}</a></li>
-      </ul>
-      ${reviewLinks()}
-    </section>
-
-    ${gallery(ctx, GALLERY.slice(0, 2), { more: false, allLink: true })}
-
-    <section id="reserver" class="section reserve" aria-labelledby="reserve-title" data-fab-hide>
-      ${kicker('Réservation')}
-      ${displayTitle(['Réservez', 'en 3 clics.'], { id: 'reserve-title' })}
-      <ol class="steps">
-        <li data-reveal><span class="steps__num" aria-hidden="true">1</span><strong>La prestation</strong><span>Coupe, couleur, balayage, homme, enfant…</span></li>
-        <li data-reveal><span class="steps__num" aria-hidden="true">2</span><strong>Les petits plus</strong><span>Cheveux épais, allongement, soin Davines</span></li>
-        <li data-reveal><span class="steps__num" aria-hidden="true">3</span><strong>Le créneau</strong><span>Le jour et l’heure qui vous arrangent</span></li>
-      </ol>
-      <div class="reserve__actions">
-        ${circleLink({ id: 'ring-reserve', ringText: 'COMMENCER · C’EST PARTI · COMMENCER · C’EST PARTI ·', label: 'Commencer la réservation', book: '' })}
-        <div class="reserve__alt">
-          <p>Vous préférez en direct ?</p>
-          <ul>
-            <li><a class="link-arrow" href="${salon.links.planity}" target="_blank" rel="noopener" data-track="planity">Réserver sur Planity ${icon('arrow-up-right')}</a></li>
-            <li>${phoneLink('link-arrow', `Appeler le ${salon.phone.display}`)}</li>
-          </ul>
+    <div class="band">
+      <section id="prestations" class="section" aria-labelledby="services-title">
+        <header class="section__head section__head--split">
+          ${kicker('Prestations')}
+          <h2 id="services-title" data-split>Mes <em>prestations</em></h2>
+          <p>Chaque rendez-vous commence par l’écoute de vos envies. Tarifs TTC ; les prix « dès » s’ajustent à votre chevelure et à votre projet.</p>
+        </header>
+        ${serviceCards(ctx)}
+        <div class="section__foot">
+          <a class="btn btn--primary" href="${ctx.rel('tarifs/')}">Voir tous les tarifs ${icon('arrow-right', 'icon--move')}</a>
+          <a class="link" href="${ctx.rel('conseil-coupe/')}">Pas sûre de la coupe ? Faites le test ${icon('arrow-right')}</a>
         </div>
+      </section>
+    </div>
+
+    <section class="section" aria-labelledby="shots-title">
+      <header class="section__head section__head--split">
+        ${kicker('Réalisations')}
+        <h2 id="shots-title" data-split>Des cheveux qui <em>vous ressemblent</em></h2>
+        <p>Balayages lumineux, coupes nettes, brushings souples : un résultat naturel, facile à porter au quotidien.</p>
+      </header>
+      ${shots(ctx, SHOTS)}
+      <div class="section__foot">
+        <a class="link" href="${ctx.rel('realisations/')}">Voir les réalisations ${icon('arrow-right')}</a>
+        <p class="note">Photos d’illustration, en attendant les photos du salon.</p>
       </div>
     </section>
 
-    ${flash(ctx)}
-    ${gift(ctx, { more: true })}
-    ${visit(ctx, { map: false })}
-    ${faq(FAQ)}
-    ${social()}`;
+    <div class="band band--creme">
+      <section class="section" aria-labelledby="avis-title">
+        ${rating({ title: html`« Comme <em>à la maison</em> »` })}
+        ${quotes(reviewsFor('home'))}
+        <div class="section__foot">
+          <a class="link" href="${ctx.rel('avis/')}">Lire tous les avis ${icon('arrow-right')}</a>
+          ${reviewLinks()}
+        </div>
+      </section>
+    </div>
+
+    ${instagram(ctx)}
+
+    <div class="has-ribbon" data-ambient="dark">
+      ${orbs()}
+      ${ribbon('book')}
+      <section id="reserver" class="section" aria-labelledby="book-title">
+        <div class="book">
+          <div>
+            ${kicker('Réservation en ligne')}
+            <h2 id="book-title" data-split>Réservez <em>en une minute</em></h2>
+            <p class="lead" style="margin-top:1.5rem">Les disponibilités de Sandy sont en temps réel sur Planity, 24 h/24. La confirmation est immédiate.</p>
+            <div class="actions" style="margin-top:2rem">
+              ${bookButton('Je réserve sur Planity')}
+              ${phoneLink('btn', 'Appeler')}
+            </div>
+            <p class="book__alt">Une question avant de réserver ? <a href="${ctx.rel('contact/')}#ecrire">Écrivez au salon</a></p>
+          </div>
+          <div>
+            <ol class="book__steps">
+              <li data-reveal><strong>Choisissez la prestation</strong><span>Coupe, couleur, balayage, homme, enfant…</span></li>
+              <li data-reveal style="--stagger:1"><strong>Le créneau qui vous arrange</strong><span>Du lundi au samedi, selon les semaines</span></li>
+              <li data-reveal style="--stagger:2"><strong>C’est confirmé</strong><span>Confirmation immédiate, à retrouver dans votre compte Planity</span></li>
+            </ol>
+            <a class="quiz-teaser" href="${ctx.rel('conseil-coupe/')}" data-reveal data-cursor="Le test">
+              ${raw(haircutSvg(teaser.art, { id: 'teaser' }))}
+              <span><strong>Quelle coupe pour moi ?</strong><span>6 à 9 questions, 3 coupes conseillées avec leur prix et leur durée</span></span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    ${visit(ctx)}`;
 
   return {
-    title: 'Un Brun d’Hair, coiffeur à Aubière | Coupe, couleur, balayage',
-    description: `Salon de coiffure intimiste à Aubière, près de Clermont-Ferrand : coupes femme, homme et enfant, couleur, gloss et balayages Davines. Note ${salon.rating.value}/5.`,
-    schema: [hairSalonSchema(), faqSchema(FAQ)],
+    title: 'Coiffeur à Aubière : Un Brun d’Hair, coupe, couleur, balayage',
+    description: `Un Brun d’Hair, salon de coiffure à Aubière près de Clermont-Ferrand : Sandy vous coiffe, coupes femme, homme et enfant, couleur et balayage Davines. ${salon.rating.value}/5 sur Planity.`,
+    schema: [hairSalonSchema()],
     body,
   };
 }

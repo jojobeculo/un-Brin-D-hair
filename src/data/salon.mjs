@@ -34,17 +34,39 @@ export const salon = {
   // Communes limitrophes d’Aubière.
   areaServed: ['Aubière', 'Clermont-Ferrand', 'Beaumont', 'Romagnat', 'Pérignat-lès-Sarliève', 'Cournon-d’Auvergne'],
 
-  // day : 0 = dimanche. Sans open/close : fermé.
+  // day : 0 = dimanche. Sans open/close : fermé. alternate : ouvert une semaine sur deux (affiché sur la vitrine).
   hours: [
-    { day: 1, name: 'Lundi', open: '10:00', close: '18:00' },
+    { day: 1, name: 'Lundi', open: '10:00', close: '18:00', alternate: true },
     { day: 2, name: 'Mardi', open: '09:00', close: '19:00' },
     { day: 3, name: 'Mercredi', open: '09:00', close: '19:00' },
     { day: 4, name: 'Jeudi', open: '09:00', close: '19:00' },
     { day: 5, name: 'Vendredi', open: '09:00', close: '19:00' },
-    { day: 6, name: 'Samedi', open: '09:00', close: '16:00' },
+    { day: 6, name: 'Samedi', open: '09:00', close: '16:00', alternate: true },
     { day: 0, name: 'Dimanche' },
   ],
-  hoursNote: 'Les horaires peuvent varier d’une semaine à l’autre : les infos à jour sont publiées sur Instagram et TikTok.',
+  // Date (AAAA-MM-JJ) d’un lundi d’une semaine où le salon ouvre le lundi ET le samedi.
+  // Vide : le site indique « une semaine sur deux » sans dire laquelle, et renvoie vers Planity.
+  alternateOpenWeek: '',
+  hoursNote: 'Lundi et samedi : une semaine sur deux. Les disponibilités exactes sont sur Planity.',
+
+  // Accès, relevés dans OpenStreetMap (octobre 2026) : à vérifier sur place et sur t2c.fr.
+  access: {
+    landmark: 'Juste à côté de la pharmacie Hauger',
+    bus: 'Arrêt Champvoisin (ligne E1, réseau T2C), à environ 85 m',
+    parking: 'Stationnement le long de la rue, à environ 70 m',
+    bike: 'Arceaux à vélos à environ 110 m',
+  },
+
+  // Parcours de Sandy (page « Qui suis-je ? »). openingYear : année d’ouverture du salon, vide si inconnue.
+  story: { experienceYears: 9, age: 25, openingYear: '' },
+
+  // Instagram : adresse d’un flux JSON (Behold.so ou équivalent), lue par tools/instagram.mjs.
+  instagramFeed: '',
+
+  // Paiement en ligne de la boutique : adresse de la fonction Stripe (voir stripe/README.md). Vide : paiement au retrait.
+  stripe: { checkoutEndpoint: '' },
+  // Délai de préparation annoncé pour le click and collect.
+  clickAndCollect: 'Sandy prépare votre commande et vous prévient dès qu’elle est prête. Retrait au salon, aux heures d’ouverture.',
   payment: 'Carte bancaire et espèces',
   brand: 'Davines',
 
@@ -78,6 +100,8 @@ export const salon = {
     naf: '96.02A (Coiffure)',
     vat: 'FR45 107 324 303',
     director: 'Sandy Brun, gérante',
+    // Médiateur de la consommation (obligatoire pour la vente en ligne) : nom et site.
+    mediator: null,
     // Champs à compléter avant la mise en ligne (null = affiché « à compléter »).
     capital: null,
     registration: null,

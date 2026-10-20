@@ -1,93 +1,76 @@
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+// Mouvements liés au défilement (en-tête, fond de l’accueil, parallaxe des photos) et effet d’onde au clic.
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-// Découpe un texte en lettres, chacune avec sa position (--i, à partir de `start`), pour les animer en cascade.
-// Les lettres d’un même mot restent groupées : un mot ne se coupe jamais en fin de ligne.
-// Renvoie la position qui suit la dernière lettre.
-function splitChars(element, start = 0) {
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-  const texts = [];
-  while (walker.nextNode()) texts.push(walker.currentNode);
-  let index = start;
-  texts.forEach((node) => {
-    const fragment = document.createDocumentFragment();
-    node.textContent.split(/(\s+)/).forEach((part) => {
-      if (!part) return;
-      if (!part.trim()) {
-        fragment.append(part);
-        return;
-      }
-      const word = document.createElement('span');
-      word.className = 'split-word';
-      [...part].forEach((char) => {
-        const letter = document.createElement('span');
-        letter.className = 'split-char';
-        letter.style.setProperty('--i', index);
-        index += 1;
-        letter.textContent = char;
-        word.append(letter);
-      });
-      fragment.append(word);
-    });
-    node.replaceWith(fragment);
-  });
-  element.classList.add('is-split');
-  return index;
-}
-
-// Seules les lignes visibles du titre sont découpées : les lecteurs d’écran lisent son texte masqué.
-function splitHeroTitle() {
-  const title = document.querySelector('.hero__title');
-  if (!title) return;
-  let index = 0;
-  title.querySelectorAll('.line').forEach((line) => {
-    index = splitChars(line, index);
-  });
-  title.classList.add('is-split');
-}
-
-// Les bandeaux défilants accélèrent avec le défilement de la page, suivent son sens et s’inclinent.
-function marqueeVelocity() {
-  const marquees = [...document.querySelectorAll('.marquee')]
-    .map((element) => ({ element, animation: element.querySelector('.marquee__track')?.getAnimations()[0] }))
-    .filter((marquee) => marquee.animation);
-  if (!marquees.length) return;
-
-  let lastY = window.scrollY;
-  let velocity = 0;
-  let direction = 1;
-  let frame = 0;
-
-  const tick = () => {
-    const y = window.scrollY;
-    velocity += (y - lastY - velocity) * 0.2;
-    lastY = y;
-    if (Math.abs(velocity) > 0.5) direction = Math.sign(velocity);
-    const speed = 1 + Math.min(Math.abs(velocity) / 10, 4);
-    const skew = Math.max(-10, Math.min(10, velocity * -0.35));
-    marquees.forEach(({ element, animation }) => {
-      animation.updatePlaybackRate(direction * speed);
-      element.style.setProperty('--skew', `${skew.toFixed(2)}deg`);
-    });
-    if (Math.abs(velocity) > 0.05) {
-      frame = requestAnimationFrame(tick);
-    } else {
-      frame = 0;
-      marquees.forEach(({ element, animation }) => {
-        animation.updatePlaybackRate(direction);
-        element.style.setProperty('--skew', '0deg');
-      });
-    }
+function initHeader() {
+  const header = document.querySelector('[data-header]');
+  if (!header) return;
+  let last = scrollY;
+  return () => {
+    const y = scrollY;
+    header.classList.toggle('is-scrolled', y > 8);
+    // Caché quand on descend, visible dès qu’on remonte (sauf si un sous-menu a le focus).
+    const hide = y > 480 && y > last + 4 && !header.contains(document.activeElement);
+    if (hide) header.classList.add('is-hidden');
+    else if (y < last - 4 || y <= 480) header.classList.remove('is-hidden');
+    last = y;
   };
+}
 
-  window.addEventListener('scroll', () => {
-    if (!frame) frame = requestAnimationFrame(tick);
-  }, { passive: true });
+function initHero() {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+  return () => {
+    const progress = Math.min(1, Math.max(0, scrollY / hero.offsetHeight));
+    hero.style.setProperty('--hero-p', progress.toFixed(3));
+  };
+}
+
+function initParallax() {
+  const visible = new Set();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => (entry.isIntersecting ? visible.add(entry.target) : visible.delete(entry.target)));
+  }, { rootMargin: '10% 0px' });
+  document.querySelectorAll('[data-parallax]').forEach((element) => observer.observe(element));
+  return () => {
+    const vh = innerHeight;
+    visible.forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      const offset = (rect.top + rect.height / 2 - vh / 2) / vh;
+      element.style.setProperty('--p', Math.max(-1, Math.min(1, offset)).toFixed(3));
+    });
+  };
+}
+
+function initRipple() {
+  document.addEventListener('pointerdown', (event) => {
+    const target = event.target.closest('.btn, .dock__main');
+    if (!target || reduced.matches) return;
+    const rect = target.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.setProperty('--x', `${event.clientX - rect.left}px`);
+    ripple.style.setProperty('--y', `${event.clientY - rect.top}px`);
+    ripple.style.setProperty('--size', `${Math.max(rect.width, rect.height) * 2.2}px`);
+    target.append(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+  });
 }
 
 export function initMotion() {
-  if (reducedMotion.matches) return;
-  splitHeroTitle();
-  const footerMark = document.querySelector('.footer__mark');
-  if (footerMark) splitChars(footerMark);
-  marqueeVelocity();
+  initRipple();
+  const tasks = [initHeader()];
+  if (!reduced.matches) tasks.push(initHero(), initParallax());
+  const active = tasks.filter(Boolean);
+  let ticking = false;
+  const run = () => {
+    ticking = false;
+    active.forEach((task) => task());
+  };
+  addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(run);
+    }
+  }, { passive: true });
+  run();
 }

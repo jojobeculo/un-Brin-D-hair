@@ -1,36 +1,33 @@
 import { html } from '../lib/html.mjs';
 import { categories, priceOf, startingPrice } from '../data/services.mjs';
-import { pageHero, lengthsLegend, priceCategory, flash, ctaBand } from '../components/blocks.mjs';
+import { pageHero, lengthsLegend, priceCategory, cta, related, bookButton } from '../components/blocks.mjs';
 
 export const route = 'tarifs/';
 
 export default function tarifs(ctx) {
-  const listed = categories.map((item) => item.id);
   const body = html`
     ${pageHero(ctx, {
-      kicker: 'La carte',
-      lines: ['Tarifs &', 'prestations.'],
+      kickerText: 'La carte',
+      title: html`Prestations <em>&amp; tarifs</em>`,
       lead: 'Toutes les prestations commencent par l’écoute. Tarifs TTC ; les prix « dès » s’ajustent à votre chevelure et à votre projet. Paiement par carte bancaire ou en espèces.',
-      book: '',
-      bookLabel: 'Réserver',
-      secondary: { route: 'diagnostic-capillaire-aubiere/', label: 'Le diagnostic' },
+      actions: html`${bookButton()} <a class="btn" href="${ctx.rel('conseil-coupe/')}">Quelle coupe pour moi ?</a>`,
     })}
 
-    <section class="section carte" aria-label="Carte des prestations">
-      <div class="carte__intro" data-reveal>
+    <section class="section" aria-label="Carte des prestations" style="padding-top:0">
+      <div style="display:grid;gap:1.5rem;margin-bottom:clamp(3rem,6vw,5rem)">
         <p>Pour choisir la bonne ligne, un repère simple :</p>
         ${lengthsLegend()}
         <nav class="chips" aria-label="Catégories de la carte">
           ${categories.map((item) => html`<a class="chip" href="#${item.anchor || `cat-${item.id}`}">${item.label}</a>`)}
         </nav>
       </div>
-      <div class="carte__list">
-        ${listed.map((id, index) => priceCategory(ctx, id, { num: String(index + 1).padStart(2, '0'), headingTag: 'h2', pageLink: true }))}
+      <div class="carte">
+        ${categories.map((item) => priceCategory(ctx, item.id, { headingTag: 'h2', pageLink: true }))}
       </div>
     </section>
 
-    ${flash(ctx)}
-    ${ctaBand({ lines: ['Votre choix', 'est fait ?'], text: 'Réservez en 3 clics : la prestation, les petits plus, puis le créneau.', book: '', label: 'Réserver' })}`;
+    ${related(ctx, ['coupe-femme-aubiere/', 'balayage-aubiere/', 'coloration-aubiere/', 'carte-cadeau/'])}
+    ${cta({ title: html`Votre choix <em>est fait</em> ?`, text: 'Réservez sur Planity : la prestation, le créneau, et c’est confirmé.' })}`;
 
   return {
     title: 'Tarifs du salon de coiffure à Aubière | Un Brun d’Hair',

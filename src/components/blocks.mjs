@@ -1,87 +1,328 @@
 // Composants réutilisables des pages. Chaque fonction renvoie du HTML (html`…`).
 // `ctx` décrit la page en cours : ctx.rel(route) donne un lien relatif, ctx.asset(chemin) un fichier.
+import { readFileSync } from 'node:fs';
 import { html, raw } from '../lib/html.mjs';
 import { salon } from '../data/salon.mjs';
-import { category, service, startingPrice, priceOf, durationOf } from '../data/services.mjs';
+import { category, startingPrice, priceOf } from '../data/services.mjs';
+import { product, lines } from '../data/products.mjs';
 import { formatDuration } from '../../assets/js/lib/format.js';
+import { formatTime } from '../../assets/js/lib/hours.js';
+import { bottleSvg } from '../../assets/js/lib/bottle.js';
+import { ribbonPaths, RIBBONS } from '../../assets/js/lib/ribbon.js';
 import { icon } from './icons.mjs';
 
-const ACCENTED = /[ÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ]/;
-
-// Largeur approximative d’une ligne en capitales Archivo ExtraCondensed Black, en em.
-// Sert à réduire un titre dont une ligne dépasse 4,5 em (la largeur prévue par base.css).
-function lineWidth(line) {
-  return [...line.toUpperCase()].reduce((sum, char) => {
-    if (char === ' ') return sum + 0.22;
-    if ('IJ’\'.,;:!?/-'.includes(char)) return sum + 0.26;
-    if ('MW'.includes(char)) return sum + 0.62;
-    return sum + 0.47;
-  }, 0);
-}
-const external = raw(' target="_blank" rel="noopener"');
+export const external = raw(' target="_blank" rel="noopener"');
 
 export const whatsappUrl = () => (salon.whatsapp ? `https://wa.me/${salon.whatsapp}?text=${encodeURIComponent(salon.whatsappMessage)}` : '');
 
-// ---------- Titres ----------
+// ---------- Photos ----------
 
-export function kicker(text, num) {
-  return html`<p class="kicker">${num ? html`<span class="kicker__num">${num}</span> ` : ''}${text}</p>`;
+const photoMeta = new Map();
+function meta(name) {
+  if (!photoMeta.has(name)) {
+    photoMeta.set(name, JSON.parse(readFileSync(new URL(`../../assets/img/photos/${name}.json`, import.meta.url))));
+  }
+  return photoMeta.get(name);
 }
 
-// Titre d’affichage sur plusieurs lignes. Une ligne avec une capitale accentuée (À, É…)
-// reçoit .line--accent, sauf la première : sinon l’accent toucherait la ligne du dessus.
-export function displayTitle(lines, { tag = 'h2', id, className = '', reveal = true } = {}) {
-  const spans = lines.map((line, index) => {
-    const accent = index > 0 && ACCENTED.test(line.toUpperCase());
-    return html`<span class="${accent ? 'line line--accent' : 'line'}">${line}</span>`;
-  });
-  const widest = Math.max(...lines.map(lineWidth));
-  const fit = widest > 4.4 ? html` style="--fit: ${(widest * 1.04).toFixed(2)}"` : '';
-  const attrs = html`${id ? html` id="${id}"` : ''} class="${`display ${className}`.trim()}"${fit}${reveal ? raw(' data-reveal="lines"') : ''}`;
-  return raw(`<${tag}${attrs}>${spans.map(String).join(' ')}</${tag}>`);
+// <picture> AVIF + WebP aux largeurs produites par tools/photos.py.
+export function photo(ctx, name, { alt = '', sizes = '100vw', eager = false, className = '' } = {}) {
+  const { widths, ratio } = meta(name);
+  const srcset = (format) => widths.map((width) => `${ctx.asset(`assets/img/photos/${name}-${width}.${format}`)} ${width}w`).join(', ');
+  const largest = widths.at(-1);
+  const fallback = widths.find((width) => width >= 960) || largest;
+  return html`<picture>
+          <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
+          <img${className ? html` class="${className}"` : ''} src="${ctx.asset(`assets/img/photos/${name}-${fallback}.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}" alt="${alt}" width="${largest}" height="${Math.round(largest / ratio)}"${eager ? raw(' fetchpriority="high"') : raw(' loading="lazy"')} decoding="async">
+        </picture>`;
 }
 
-// ---------- Boutons ----------
+// ---------- Textes et boutons ----------
 
-export function ring(id, text, { radius = 80, length = 500 } = {}) {
-  const d = `M100,100 m-${radius},0 a${radius},${radius} 0 1,1 ${radius * 2},0 a${radius},${radius} 0 1,1 -${radius * 2},0`;
-  return html`<svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="${id}" d="${d}"/></defs><text><textPath href="#${id}" textLength="${length}">${text}</textPath></text></svg>`;
+export const kicker = (text) => html`<p class="kicker">${text}</p>`;
+
+export function bookButton(label = 'Je réserve', className = 'btn btn--primary') {
+  return html`<a class="${className}" href="${salon.links.planity}"${external} data-track="planity" data-magnetic data-cursor="Réserver">${label} ${icon('arrow-up-right', 'icon--move')}</a>`;
 }
 
-// Bouton rond magenta. `book` ouvre le tunnel de réservation (identifiant de prestation ou de catégorie).
-export function circleLink({ id, ringText, label, iconName = 'arrow-right', book, href = salon.links.planity, newTab = false }) {
-  return html`<a class="btn-circle btn-circle--xl" href="${href}"${book === undefined ? '' : html` data-book="${book}"`}${newTab ? external : ''} data-magnetic data-track="planity">
-          ${ring(id, ringText)}
-          ${icon(iconName, 'icon--lg')}
-          <span class="visually-hidden">${label}</span>
-        </a>`;
-}
-
-export function phoneLink(className = 'link-arrow', text = salon.phone.display) {
+export function phoneLink(className = 'link', text = salon.phone.display) {
   return html`<a class="${className}" href="tel:${salon.phone.tel}" data-track="phone">${icon('phone')} ${text}</a>`;
 }
 
-export function actionLinks() {
+export function contactActions(className = 'btn') {
   const whatsapp = whatsappUrl();
-  return html`<ul class="action-links">
-          <li><a class="link-arrow" href="${salon.links.planity}"${external} data-track="planity">Réserver sur Planity ${icon('arrow-up-right')}</a></li>
-          <li>${phoneLink('link-arrow', `Appeler le ${salon.phone.display}`)}</li>
-          ${whatsapp ? html`<li><a class="link-arrow" href="${whatsapp}"${external} data-track="whatsapp">${icon('whatsapp')} Écrire sur WhatsApp</a></li>` : ''}
-          <li><a class="link-arrow" href="${salon.links.googleDirections}"${external} data-track="itineraire">${icon('navigation')} Itinéraire</a></li>
-        </ul>`;
+  return html`${phoneLink(className, 'Appeler')}
+          ${whatsapp ? html`<a class="${className}" href="${whatsapp}"${external} data-track="whatsapp">${icon('whatsapp')} WhatsApp</a>` : ''}
+          <a class="${className}" href="${salon.links.googleDirections}"${external} data-track="itineraire">${icon('navigation')} Itinéraire</a>`;
 }
+
+// ---------- Décor ----------
+
+// Ruban organique (assets/js/lib/ribbon.js) : dessin fixe, animé par fx.js sur ordinateur.
+export function ribbon(name, className = '') {
+  const shape = RIBBONS[name];
+  const paths = ribbonPaths(shape.points, shape);
+  return html`<div class="${`ribbon ribbon--${name} ${className}`.trim()}" data-ribbon="${name}"${name === 'hero' ? '' : raw(' data-parallax')} aria-hidden="true">
+        <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+          <defs><radialGradient id="ribbon-light-${name}" gradientUnits="userSpaceOnUse" cx="720" cy="450" r="700"><stop offset="0" stop-color="#C9A27A"/><stop offset="0.55" stop-color="#A9825F"/><stop offset="1" stop-color="#A9825F" stop-opacity="0.35"/></radialGradient></defs>
+          <g stroke="url(#ribbon-light-${name})">${paths.map((d, index) => html`<path d="${d}" pathLength="1" style="--i:${index}"/>`)}</g>
+        </svg>
+      </div>`;
+}
+
+// Orbes de lumière floues (dégradés radiaux, sans filtre) : elles dérivent et suivent la souris avec inertie.
+export const orbs = () => html`<div class="orbs" aria-hidden="true"><div class="orbs__layer" data-orbs><span class="orb orb--1"></span><span class="orb orb--2"></span><span class="orb orb--3"></span></div></div>`;
+
+// Vague de la vitrine : petit trait décoratif.
+export const wave = (className = 'statement__wave draw-line') => html`<svg class="${className}" viewBox="0 0 320 24" aria-hidden="true" data-reveal-line><path d="M2 12 C 22 2, 42 2, 62 12 S 102 22, 122 12 S 162 2, 182 12 S 222 22, 242 12 S 282 2, 318 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" pathLength="1"/></svg>`;
 
 // ---------- En-tête des pages intérieures ----------
 
-export function pageHero(ctx, { kicker: kickerText, lines, lead, book, bookLabel, secondary }) {
-  return html`<section class="page-hero" aria-labelledby="page-title">
-      ${kicker(kickerText)}
-      ${displayTitle(lines, { tag: 'h1', id: 'page-title', className: 'page-hero__title', reveal: false })}
-      <p class="lead page-hero__lead">${lead}</p>
-      <div class="page-hero__actions" data-fab-hide>
-        <a class="btn btn--solid" href="${salon.links.planity}" data-book="${book || ''}" data-track="planity">${bookLabel || 'Réserver'} ${icon('arrow-right')}</a>
-        ${phoneLink('btn', 'Appeler')}
-        ${secondary ? html`<a class="link-arrow" href="${ctx.rel(secondary.route)}">${secondary.label} ${icon('arrow-right')}</a>` : ''}
+export function pageHero(ctx, { kickerText, title, lead, image, alt = '', facts = [], actions }) {
+  return html`<section class="${image ? 'page-hero page-hero--media' : 'page-hero'}" aria-labelledby="page-title">
+      <div>
+        ${kicker(kickerText)}
+        <h1 id="page-title" data-split>${title}</h1>
+        ${lead ? html`<p class="lead">${lead}</p>` : ''}
+        <div class="actions">${actions === undefined ? html`${bookButton()} ${phoneLink('btn', 'Appeler')}` : actions}</div>
+        ${facts.length ? html`<ul class="page-hero__facts">${facts.map(([label, value]) => html`<li>${label} <strong>${value}</strong></li>`)}</ul>` : ''}
+      </div>
+      ${image ? html`<div class="page-hero__media"><div class="arch" data-reveal="mask">${photo(ctx, image, { alt, sizes: '(min-width: 960px) 460px, 90vw', eager: true })}</div></div>` : ''}
+    </section>`;
+}
+
+// ---------- Prestations ----------
+
+const SERVICES = [
+  { id: 'femme', title: 'Coupe & brushing', text: 'Une coupe pensée pour vos cheveux et votre quotidien, conseils compris.', image: 'coupe', alt: 'Coupe aux ciseaux sur cheveux bruns' },
+  { id: 'couleur', title: 'Coloration & gloss', text: 'Racines, éclat, reflets neutralisés, premiers cheveux blancs estompés.', image: 'couleur', alt: 'Mise en forme de cheveux cuivrés' },
+  { id: 'balayage', title: 'Balayage', text: 'Lumières & Subtil ou Éclat & Intense, toujours après un diagnostic.', image: 'boucles', alt: 'Cheveux longs méchés blonds et bouclés' },
+  { id: 'homme', title: 'Homme & enfant', text: 'Shampoing, coupe et coiffage. Les moins de 12 ans aussi.', image: 'outils', alt: 'Ciseaux et brosses de coiffure sur un plan de travail' },
+  { id: 'soin', title: 'Soins Davines', text: 'Le soin adapté aux besoins de vos cheveux, pendant votre rendez-vous.', image: 'soin', alt: 'Shampoing au bac à shampoing' },
+  { id: 'diagnostic', title: 'Diagnostic capillaire', text: '15 minutes pour définir votre projet, déduites de votre prestation.', image: 'mise-en-forme', alt: 'Coiffeuse qui travaille une coiffure attachée' },
+];
+
+export function serviceCards(ctx, ids = SERVICES.map((item) => item.id), { headingTag = 'h3' } = {}) {
+  return html`<ul class="cards">
+        ${ids.map((id, index) => {
+          const item = SERVICES.find((entry) => entry.id === id);
+          const cat = category(id);
+          const href = `${ctx.rel(cat.page)}${cat.anchor ? `#${cat.anchor}` : ''}`;
+          return html`<li data-reveal style="--stagger:${index % 3}">
+          <a class="card" href="${href}" data-cursor="Découvrir">
+            <div class="card__media">${photo(ctx, item.image, { alt: item.alt, sizes: '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw' })}</div>
+            <div class="card__body">
+              ${raw(`<${headingTag} class="card__title">${html`${item.title}`}</${headingTag}>`)}
+              <p class="card__text">${item.text}</p>
+              <p class="card__foot"><span>${id === 'homme' ? priceOf('homme-forfait') : startingPrice(id)}</span>${icon('arrow-right')}</p>
+            </div>
+          </a>
+        </li>`;
+        })}
+      </ul>`;
+}
+
+// ---------- Réalisations (photos d’illustration, à remplacer par les photos du salon) ----------
+
+export const SHOTS = [
+  { image: 'boucles', title: 'Balayage lumineux', tag: 'Balayage', alt: 'Cheveux longs blonds et bouclés, vus de dos', layout: 'tall' },
+  { image: 'coupe', title: 'Coupe sur cheveux lisses', tag: 'Coupe', alt: 'Coupe aux ciseaux sur cheveux bruns lisses' },
+  { image: 'brushing', title: 'Brushing', tag: 'Brushing', alt: 'Brushing à la brosse ronde et au séchoir' },
+  { image: 'couleur', title: 'Reflets cuivrés', tag: 'Couleur', alt: 'Cheveux cuivrés mis en boucles au fer', layout: 'wide' },
+  { image: 'mise-en-forme', title: 'Coiffure attachée', tag: 'Coiffage', alt: 'Chignon bouclé en cours de réalisation' },
+  { image: 'soin', title: 'Soin au bac', tag: 'Soin', alt: 'Shampoing et soin au bac' },
+];
+
+export function shots(ctx, items = SHOTS) {
+  return html`<div class="shots">
+        ${items.map((item, index) => html`<figure class="${item.layout ? `shot shot--${item.layout}` : 'shot'}" data-reveal style="--stagger:${index % 4}" data-parallax>
+          ${photo(ctx, item.image, { alt: item.alt, sizes: item.layout === 'wide' ? '(min-width: 900px) 50vw, 100vw' : '(min-width: 900px) 25vw, 50vw' })}
+          <figcaption><strong>${item.title}</strong><span>${item.tag}</span></figcaption>
+        </figure>`)}
+      </div>`;
+}
+
+// ---------- Avis ----------
+
+export function stars() {
+  return html`<span class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(() => html`<svg><use href="#i-star"/></svg>`)}</span>`;
+}
+
+export function rating({ title, titleTag = 'h2', id = 'avis-title' }) {
+  return html`<div class="rating">
+        <p class="rating__score" data-reveal>
+          <span class="visually-hidden">Note moyenne : ${salon.rating.value} sur 5</span>
+          <span class="rating__num" aria-hidden="true" data-count="${salon.rating.value.replace(',', '.')}">${salon.rating.value}</span><span class="rating__out" aria-hidden="true">/5</span>
+        </p>
+        <div class="rating__meta">
+          ${kicker('Avis clients')}
+          ${raw(`<${titleTag} id="${id}" data-split>${html`${title}`}</${titleTag}>`)}
+          <p>${stars()} <strong>${salon.rating.planityCount} avis sur Planity</strong> · ${salon.rating.googleCount} avis sur Google</p>
+          <dl class="subscores">
+            ${salon.rating.subscores.map(([label, value]) => html`<div><dt>${label}</dt><dd>${value}</dd></div>`)}
+          </dl>
+        </div>
+      </div>`;
+}
+
+export function quotes(list) {
+  return html`<ul class="quotes">
+        ${list.map((review, index) => html`<li class="quote" data-reveal style="--stagger:${index % 3}">
+          <blockquote><p>${review.text}</p></blockquote>
+          <p class="quote__meta">Avis Planity${review.service ? ` · ${review.service}` : ''} · ${review.date}</p>
+        </li>`)}
+      </ul>`;
+}
+
+export function reviewLinks() {
+  return html`<a class="link" href="${salon.links.planity}"${external}>Tous les avis sur Planity ${icon('arrow-up-right')}</a>
+        <a class="link" href="${salon.links.googleMaps}"${external}>Les avis Google ${icon('arrow-up-right')}</a>`;
+}
+
+// ---------- Instagram ----------
+
+// Publications récupérées par tools/instagram.mjs (src/data/instagram.json). Sans flux : photos du site.
+function instagramPosts() {
+  try {
+    return JSON.parse(readFileSync(new URL('../data/instagram.json', import.meta.url))).slice(0, 6);
+  } catch {
+    return [];
+  }
+}
+
+export function instagram(ctx, { titleTag = 'h2' } = {}) {
+  const posts = instagramPosts();
+  const fallback = ['coupe', 'boucles', 'brushing', 'couleur', 'mise-en-forme', 'soin'];
+  return html`<section class="section" aria-labelledby="insta-title">
+      <div class="insta__head">
+        <div>
+          ${kicker('Instagram')}
+          ${raw(`<${titleTag} id="insta-title" data-split>${html`Les dernières <em>réalisations</em>`}</${titleTag}>`)}
+        </div>
+        <a class="btn" href="${salon.links.instagram}"${external}>${icon('instagram')} Suivre @unbrundhair</a>
+      </div>
+      <ul class="insta">
+        ${posts.length
+          ? posts.map((post, index) => html`<li data-reveal style="--stagger:${index}"><a href="${post.permalink}"${external} aria-label="${`Voir la publication Instagram : ${post.caption || 'réalisation du salon'}`}"><img src="${post.image}" alt="${post.caption || ''}" width="400" height="400" loading="lazy" decoding="async"></a></li>`)
+          : fallback.map((name, index) => html`<li data-reveal style="--stagger:${index}"><a href="${salon.links.instagram}"${external} aria-label="Voir le compte Instagram du salon">${photo(ctx, name, { sizes: '(min-width: 900px) 200px, 33vw' })}</a></li>`)}
+      </ul>
+      ${posts.length ? '' : html`<p class="note" style="margin-top:1rem">Photos d’illustration : le fil Instagram du salon s’affichera ici une fois relié (voir README).</p>`}
+    </section>`;
+}
+
+// ---------- Horaires et accès ----------
+
+const DAYS_LOWER = (name) => name.toLowerCase();
+const timeOf = (hhmm) => {
+  const [hours, minutes] = hhmm.split(':').map(Number);
+  return formatTime(hours * 60 + minutes);
+};
+
+// « Lundi de 10 h à 18 h, du mardi au vendredi de 9 h à 19 h… » : les jours qui se suivent avec les mêmes horaires sont regroupés.
+export function hoursSentence() {
+  const groups = [];
+  salon.hours.forEach((day) => {
+    const last = groups.at(-1);
+    if (last && last.open === day.open && last.close === day.close) last.days.push(DAYS_LOWER(day.name));
+    else groups.push({ open: day.open, close: day.close, days: [DAYS_LOWER(day.name)] });
+  });
+  const sentence = groups.map(({ open, close, days }) => {
+    const when = days.length > 1 ? `du ${days[0]} au ${days.at(-1)}` : days[0];
+    if (!open) return `fermé ${days.length > 1 ? when : `le ${when}`}`;
+    return `${when} de ${timeOf(open)} à ${timeOf(close)}`;
+  }).join(', ');
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+}
+
+function hoursTable() {
+  return html`<table class="hours" data-hours>
+            <caption class="visually-hidden">Horaires d’ouverture</caption>
+            <tbody>
+              ${salon.hours.map((day) => html`<tr data-day="${day.day}"><th scope="row">${day.name}</th><td>${day.open ? html`${timeOf(day.open)} – ${timeOf(day.close)}${day.alternate ? html`<sup>*</sup>` : ''}` : 'Fermé'}</td></tr>`)}
+            </tbody>
+          </table>
+          <p class="small"><sup>*</sup> Une semaine sur deux. <span data-alt-week></span> Les créneaux exacts sont sur Planity.</p>`;
+}
+
+// Plan du quartier : fond OpenStreetMap (tools/plan.py) et couche animée (rues principales, noms, repères).
+const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
+const POI = { bus: ['bus', 'Bus E1'], parking: ['parking', 'Parking'], velo: ['bike', 'Vélos'] };
+
+function planMap(ctx) {
+  const cx = plan.width / 2;
+  const cy = plan.height / 2;
+  const googleEmbed = `https://www.google.com/maps?q=${encodeURIComponent(`Un Brun d'Hair, ${salon.address.street}, ${salon.address.postalCode} ${salon.address.city}`)}&output=embed`;
+  return html`<div class="plan" data-plan data-embed="${googleEmbed}">
+          <img src="${ctx.asset('assets/img/plan-quartier.svg')}" alt="" width="${plan.width}" height="${plan.height}" loading="lazy" decoding="async">
+          <svg class="plan__overlay" viewBox="0 0 ${plan.width} ${plan.height}" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="plan-desc">
+            <desc id="plan-desc">Plan du quartier : le salon au ${salon.address.street}, à Aubière, avec l’arrêt de bus, le stationnement et les arceaux à vélos les plus proches.</desc>
+            <g class="plan__main">${plan.main.map((d) => html`<path d="${d}" pathLength="1"/>`)}</g>
+            <defs>${plan.labels.map((label, index) => html`<path id="plan-street-${index}" d="${label.d}"/>`)}</defs>
+            ${plan.labels.map((label, index) => html`<text class="plan__label" style="--delay:${(1.4 + index * 0.15).toFixed(2)}s"><textPath href="#plan-street-${index}" startOffset="50%" text-anchor="middle">${label.name}</textPath></text>`)}
+            ${plan.pois.map((poi, index) => html`<g class="plan__poi" style="--delay:${(1.1 + index * 0.2).toFixed(1)}s">
+              <circle cx="${poi.x}" cy="${poi.y}" r="13"/>
+              <use href="#i-${POI[poi.kind][0]}" x="${poi.x - 8}" y="${poi.y - 8}" width="16" height="16"/>
+              <text x="${poi.x}" y="${poi.y + 28}" text-anchor="middle">${POI[poi.kind][1]}</text>
+            </g>`)}
+            <g class="plan__salon" style="--delay:.7s">
+              <circle class="halo" cx="${cx}" cy="${cy}" r="26"/>
+              <path class="pin" d="M${cx} ${cy + 2} c-9 -11 -15 -18 -15 -26 a15 15 0 0 1 30 0 c0 8 -6 15 -15 26z"/>
+              <circle class="dot" cx="${cx}" cy="${cy - 24}" r="5.5"/>
+              <text x="${cx + 22}" y="${cy - 30}">Un Brun d’Hair</text>
+            </g>
+          </svg>
+          <div class="plan__bar">
+            <button class="btn btn--sm" type="button" data-plan-google>${icon('pin')} Ouvrir Google Maps ici</button>
+            <span class="plan__credit">© <a href="https://www.openstreetmap.org/copyright"${external}>OpenStreetMap</a></span>
+          </div>
+        </div>`;
+}
+
+function directions() {
+  return html`<div class="directions">
+            <a class="btn btn--sm" href="${salon.links.googleDirections}"${external} data-track="itineraire">Google Maps</a>
+            <a class="btn btn--sm" href="${salon.links.waze}"${external} data-track="itineraire">Waze</a>
+            <a class="btn btn--sm" href="${salon.links.applePlans}"${external} data-track="itineraire">Plans</a>
+          </div>`;
+}
+
+export function visit(ctx, { titleTag = 'h2', title = html`Venir <em>au salon</em>`, kickerText = 'Contact & accès' } = {}) {
+  const { access } = salon;
+  return html`<section id="acces" class="section" aria-labelledby="visit-title">
+      <header class="section__head">
+        ${kicker(kickerText)}
+        ${raw(`<${titleTag} id="visit-title" data-split>${html`${title}`}</${titleTag}>`)}
+      </header>
+      <div class="visit">
+        <div data-reveal>
+          ${planMap(ctx)}
+        </div>
+        <div class="visit__info">
+          <div>
+            <address class="visit__address">${salon.address.street}<br>${salon.address.postalCode} ${salon.address.city}<small>${access.landmark}, près du campus des Cézeaux.</small></address>
+          </div>
+          <div class="actions">
+            ${bookButton('Je réserve', 'btn btn--primary btn--sm')}
+            ${phoneLink('btn btn--sm', salon.phone.display)}
+          </div>
+          <div>
+            <h3 class="visit__label">Accès</h3>
+            <ul class="access">
+              <li>${icon('bus')}<span>${access.bus}</span></li>
+              <li>${icon('parking')}<span>${access.parking}</span></li>
+              <li>${icon('bike')}<span>${access.bike}</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="visit__label">Itinéraire</h3>
+            ${directions()}
+          </div>
+          <div>
+            <h3 class="visit__label">Horaires</h3>
+            <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+            ${hoursTable()}
+          </div>
+        </div>
       </div>
     </section>`;
 }
@@ -90,9 +331,9 @@ export function pageHero(ctx, { kicker: kickerText, lines, lead, book, bookLabel
 
 export function lengthsLegend() {
   return html`<ul class="lengths">
-            <li>${icon('len-courts', 'icon--len')}<span><strong>Courts</strong> au niveau de l’oreille</span></li>
-            <li>${icon('len-milongs', 'icon--len')}<span><strong>Mi-longs</strong> au-dessus de l’épaule</span></li>
-            <li>${icon('len-longs', 'icon--len')}<span><strong>Longs</strong> en-dessous de l’épaule</span></li>
+            <li><strong>Courts</strong> au niveau de l’oreille</li>
+            <li><strong>Mi-longs</strong> au-dessus de l’épaule</li>
+            <li><strong>Longs</strong> en-dessous de l’épaule</li>
           </ul>`;
 }
 
@@ -100,10 +341,10 @@ export function diagnosticWarning(ctx) {
   const route = 'diagnostic-capillaire-aubiere/';
   const more = ctx.route === route ? '' : html` <a href="${ctx.rel(route)}">Tout savoir sur le diagnostic</a>`;
   return html`<aside class="warning">
-              ${icon('warning', 'warning__icon')}
+              ${icon('warning')}
               <div>
                 <p class="warning__title">Obligatoire avant un balayage ou un éclaircissement</p>
-                <p>Pour tout balayage ou changement de couleur nécessitant un éclaircissement, une consultation préalable est obligatoire : elle permet d’analyser votre chevelure et de construire un projet réalisable. Elle ne peut pas être réservée le même jour que la prestation technique.${more}</p>
+                <p>Une consultation préalable permet d’analyser votre chevelure et de construire un projet réalisable. Elle ne peut pas avoir lieu le même jour que la prestation technique.${more}</p>
               </div>
             </aside>`;
 }
@@ -111,72 +352,60 @@ export function diagnosticWarning(ctx) {
 function priceRow(item) {
   const sign = item.option ? '+' : '';
   return html`<li class="${item.option ? 'row row--option' : 'row'}">
-                <span class="row__name">${item.len ? icon(`len-${item.len}`, 'icon--len') : ''}${item.label}${item.sub ? html`<small>${item.sub}</small>` : ''}</span>
+                <span class="row__name">${item.label}${item.sub ? html`<small>${item.sub}</small>` : ''}</span>
                 <span class="row__time">${sign}${formatDuration(item.duration)}</span>
                 <span class="row__price">${item.from ? html`<small>dès</small>` : ''}${`${sign}${item.price} €`}</span>
-                ${item.option ? '' : html`<a class="row__add" href="${salon.links.planity}" data-book="${item.id}" data-track="planity" aria-label="${`Réserver : ${item.name}`}">${icon('plus')}</a>`}
               </li>`;
 }
 
-export function priceCategory(ctx, id, { num, headingTag = 'h3', pageLink = false } = {}) {
+export function priceCategory(ctx, id, { headingTag = 'h3', pageLink = false } = {}) {
   const cat = category(id);
-  const heading = raw(`<${headingTag} class="cat__title">${html`${cat.title}${cat.titleAccent ? html` <span>${cat.titleAccent}</span>` : ''}`}</${headingTag}>`);
+  const heading = raw(`<${headingTag}>${html`${cat.title}${cat.titleAccent ? html` <em>${cat.titleAccent}</em>` : ''}`}</${headingTag}>`);
+  const groupTag = headingTag === 'h2' ? 'h3' : 'h4';
   const groups = cat.groups.map((group) => {
     const rows = html`<ul class="rows">${group.services.map(priceRow)}</ul>`;
     if (!group.title) return rows;
-    const groupTag = headingTag === 'h2' ? 'h3' : 'h4';
     return html`<div class="group">
               ${raw(`<${groupTag} class="group__title">${html`${group.title}`}</${groupTag}>`)}
               ${group.description ? html`<p class="group__desc">${group.description}</p>` : ''}
               ${rows}
             </div>`;
   });
-  return html`<article id="${cat.anchor || `cat-${cat.id}`}" class="${cat.highlight ? 'cat cat--highlight' : 'cat'}">
-          <header class="cat__head" data-reveal>
-            ${num ? html`<p class="cat__num" aria-hidden="true">${num}</p>` : ''}
+  return html`<article id="${cat.anchor || `cat-${cat.id}`}" class="cat">
+          <header class="cat__head">
             ${heading}
-            <p class="cat__desc">${cat.description}</p>
+            <p>${cat.description}</p>
             ${cat.tip ? html`<p class="cat__tip">${cat.tip}</p>` : ''}
-            ${cat.alert ? html`<p class="cat__tip cat__tip--alert">${icon('warning')} ${cat.alert} <a href="${ctx.rel('diagnostic-capillaire-aubiere/')}">Le diagnostic</a></p>` : ''}
-            ${pageLink && cat.page ? html`<a class="link-arrow cat__more" href="${ctx.rel(cat.page)}${cat.anchor ? `#${cat.anchor}` : ''}">En savoir plus ${icon('arrow-right')}</a>` : ''}
+            ${cat.alert ? html`<p class="cat__tip cat__tip--alert">${cat.alert} <a href="${ctx.rel('diagnostic-capillaire-aubiere/')}">Le diagnostic</a></p>` : ''}
+            ${pageLink && cat.page ? html`<a class="link" href="${ctx.rel(cat.page)}${cat.anchor ? `#${cat.anchor}` : ''}">En savoir plus ${icon('arrow-right')}</a>` : ''}
           </header>
-          <div class="cat__body">
+          <div>
             ${groups}
             ${cat.id === 'diagnostic' ? diagnosticWarning(ctx) : ''}
           </div>
         </article>`;
 }
 
-// ---------- Bandeau de réservation (fin de page) ----------
-
-export function ctaBand({ id = 'cta', lines, text, book = '', label = 'Réserver' }) {
-  return html`<section class="section cta-band" aria-labelledby="${id}-title" data-fab-hide>
-      <div class="cta-band__inner">
-        <div class="cta-band__text">
-          ${displayTitle(lines, { id: `${id}-title` })}
-          <p>${text}</p>
-        </div>
-        <div class="cta-band__actions">
-          ${circleLink({ id: `ring-${id}`, ringText: 'RÉSERVER · EN 3 CLICS · RÉSERVER · EN 3 CLICS ·', label, book })}
-          ${actionLinks()}
-        </div>
-      </div>
-    </section>`;
-}
-
 // ---------- Questions fréquentes ----------
 
-export function faq(items, { lines = ['Vos', 'questions.'], id = 'faq' } = {}) {
-  return html`<section class="section faq" aria-labelledby="${id}-title">
-      <header class="section__head">
-        ${kicker('Questions fréquentes')}
-        ${displayTitle(lines, { id: `${id}-title` })}
-      </header>
-      <div class="faq__list">
+export function faqList(items) {
+  return html`<div class="faq__list">
         ${items.map((item) => html`<details class="faq__item">
-          <summary>${item.q}${icon('chevron', 'faq__chevron')}</summary>
+          <summary>${item.q}${icon('plus')}</summary>
           <div class="faq__answer"><p>${item.a}</p></div>
         </details>`)}
+      </div>`;
+}
+
+export function faq(items, { title = html`Vos <em>questions</em>`, id = 'faq', more } = {}) {
+  return html`<section class="section" aria-labelledby="${id}-title">
+      <div class="faq">
+        <header>
+          ${kicker('Questions fréquentes')}
+          <h2 id="${id}-title" data-split>${title}</h2>
+          ${more ? html`<p style="margin-top:1.5rem">${more}</p>` : ''}
+        </header>
+        ${faqList(items)}
       </div>
     </section>`;
 }
@@ -187,174 +416,77 @@ export const faqSchema = (items) => ({
   mainEntity: items.map((item) => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })),
 });
 
-// ---------- Avis ----------
+// ---------- Bandeau final ----------
 
-export function quotes(list) {
-  return html`<ul class="quotes">
-        ${list.map((review) => html`<li class="quote" data-reveal>
-          <blockquote><p>${review.text}</p></blockquote>
-          <p class="quote__meta">Avis Planity${review.service ? ` · ${review.service}` : ''} · ${review.date}</p>
-        </li>`)}
-      </ul>`;
-}
-
-export function stars(className = 'stars') {
-  return html`<span class="${className}" aria-hidden="true">${[1, 2, 3, 4, 5].map(() => html`<svg><use href="#i-star"/></svg>`)}</span>`;
-}
-
-export function rating({ lines, titleTag = 'h2', titleId = 'avis-title' }) {
-  return html`<div class="avis__top">
-        <div class="avis__score" data-reveal>
-          <p class="avis__big">
-            <span class="visually-hidden">Note moyenne : ${salon.rating.value} sur 5</span>
-            <span class="avis__num" aria-hidden="true" data-count-to="${salon.rating.value.replace(',', '.')}">${salon.rating.value}</span><span class="avis__out" aria-hidden="true">/5</span>
-          </p>
-          <p class="stars stars--lg" aria-hidden="true">${[1, 2, 3, 4, 5].map(() => html`<svg><use href="#i-star"/></svg>`)}</p>
-          <p class="avis__count"><strong>${salon.rating.planityCount} avis sur Planity</strong> · ${salon.rating.googleCount} avis sur Google</p>
-        </div>
-        <div class="avis__head">
-          ${displayTitle(lines, { tag: titleTag, id: titleId })}
-          <dl class="subscores">
-            ${salon.rating.subscores.map(([label, value]) => html`<div><dt>${label}</dt><dd>${value}</dd></div>`)}
-          </dl>
-          <p class="small">Notes détaillées des avis Planity.</p>
-        </div>
-      </div>`;
-}
-
-export function reviewLinks() {
-  return html`<ul class="avis__links">
-        <li><a class="link-arrow" href="${salon.links.planity}"${external}>Tous les avis sur Planity ${icon('arrow-up-right')}</a></li>
-        <li><a class="link-arrow" href="${salon.links.googleMaps}"${external}>Les avis Google ${icon('arrow-up-right')}</a></li>
-      </ul>`;
-}
-
-// ---------- Avant / après ----------
-
-// Légende : longueur, durée et prix de la prestation `book`, lus dans la carte des prestations.
-export const GALLERY = [
-  { slug: 'balayage-lumieres', title: 'Balayage Lumières & Subtil', book: 'balayage-lumieres-longs', before: 'Avant : mèche brune unie', after: 'Après : mèche illuminée par un balayage lumières et subtil', modifier: 'a' },
-  { slug: 'balayage-eclat', title: 'Balayage Éclat & Intense', book: 'balayage-eclat-longs', before: 'Avant : mèche brune aux longueurs ternes', after: 'Après : mèche aux nuances lumineuses d’un balayage éclat et intense', modifier: 'b' },
-  { slug: 'coupe', title: 'Coupe & brushing', book: 'femme-scb-milongs', before: 'Avant : longueurs irrégulières et pointes abîmées', after: 'Après : coupe nette et brushing lisse', modifier: 'c' },
-  { slug: 'gloss', title: 'Gloss & brillance', book: 'couleur-scb-longs', before: 'Avant : mèche terne aux reflets cuivrés', after: 'Après : mèche brillante, reflets neutralisés par un gloss', modifier: 'd' },
-];
-
-const galleryMeta = (item) => `${service(item.book).label} · ${durationOf(item.book)} · ${priceOf(item.book)}`;
-
-export function compare(ctx, item, modifier = item.modifier) {
-  const image = (state) => ctx.asset(`assets/img/avant-apres/${item.slug}-${state}.svg`);
-  return html`<figure class="compare compare--${modifier}" data-compare data-reveal>
-          <div class="compare__frame" data-cursor="Glisser">
-            <img class="compare__img" src="${image('apres')}" alt="${item.after}" width="800" height="1000" loading="lazy" decoding="async">
-            <img class="compare__img compare__img--before" src="${image('avant')}" alt="${item.before}" width="800" height="1000" loading="lazy" decoding="async">
-            <span class="compare__tag">Avant</span>
-            <span class="compare__tag compare__tag--after">Après</span>
-            <span class="compare__line" aria-hidden="true"></span>
-            <span class="compare__handle" aria-hidden="true">${icon('drag')}</span>
-            <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="${`Comparer avant et après : ${item.title}`}">
-          </div>
-          <figcaption>
-            <span class="compare__title">${item.title}</span>
-            <span class="compare__meta">${galleryMeta(item)}</span>
-            <a class="link-arrow" href="${salon.links.planity}" data-book="${item.book}" data-track="planity">Réserver ${icon('arrow-right')}</a>
-          </figcaption>
-        </figure>`;
-}
-
-export function gallery(ctx, items, { lines = ['Avant', '/ après.'], kickerText = 'Transformations', intro, more = true, allLink = false, titleTag = 'h2' } = {}) {
-  const modifiers = ['a', 'b', 'c', 'd'];
-  return html`<section class="section gallery" aria-labelledby="gallery-title">
-      <header class="section__head gallery__head">
-        <div>
-          ${kicker(kickerText)}
-          ${displayTitle(lines, { tag: titleTag, id: 'gallery-title' })}
-        </div>
-        <p class="gallery__intro" data-reveal>${intro || 'Balayages, couleurs, coupes : des transformations pensées pour chaque chevelure, jamais en série. Glissez pour comparer.'}</p>
-      </header>
-      <div class="gallery__grid">
-        ${items.map((item, index) => compare(ctx, item, modifiers[index % 4]))}
+export function cta({ title = html`On se <em>rencontre</em> ?`, text = 'Choisissez votre prestation et le créneau qui vous arrange sur Planity : la confirmation est immédiate.' } = {}) {
+  return html`<div class="has-ribbon" data-ambient="dark">
+    ${orbs()}
+    <section class="section cta" aria-labelledby="cta-title">
+      ${kicker('Réservation')}
+      <h2 id="cta-title" data-split>${title}</h2>
+      <p>${text}</p>
+      <div class="actions" style="justify-content:center">
+        ${bookButton('Je réserve sur Planity')}
+        ${phoneLink('btn', 'Appeler')}
       </div>
-      ${more ? html`<p class="gallery__more" data-reveal>Toutes les réalisations, en photo et en vidéo : <a href="${salon.links.instagram}"${external}>Instagram</a> et <a href="${salon.links.tiktok}"${external}>TikTok</a>, @unbrundhair.</p>` : ''}
-      ${allLink ? html`<p class="gallery__more" data-reveal><a class="link-arrow" href="${ctx.rel('galerie/')}">Voir toutes les transformations ${icon('arrow-right')}</a></p>` : ''}
-    </section>`;
+    </section>
+  </div>`;
 }
 
-// ---------- Horaires et accès ----------
+// ---------- Liens internes ----------
 
-// « Lundi de 10:00 à 18:00, du mardi au vendredi de 09:00 à 19:00… » : les jours qui se suivent avec les mêmes horaires sont regroupés.
-export function hoursSentence() {
-  const groups = [];
-  salon.hours.forEach((day) => {
-    const last = groups.at(-1);
-    if (last && last.open === day.open && last.close === day.close) last.days.push(day.name.toLowerCase());
-    else groups.push({ open: day.open, close: day.close, days: [day.name.toLowerCase()] });
-  });
-  const sentence = groups.map(({ open, close, days }) => {
-    const when = days.length > 1 ? `du ${days[0]} au ${days.at(-1)}` : days[0];
-    if (!open) return `fermé ${days.length > 1 ? when : `le ${when}`}`;
-    return `${when} de ${open} à ${close}`;
-  }).join(', ');
-  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
-}
+export const PAGES = {
+  'coupe-femme-aubiere/': ['Coupe femme', 'Coupe et brushing'],
+  'coupe-homme-aubiere/': ['Coupe homme & enfant', 'Forfait homme, moins de 12 ans'],
+  'coloration-aubiere/': ['Coloration & gloss', 'Racines, éclat, cheveux blancs'],
+  'balayage-aubiere/': ['Balayage', 'Lumières & Subtil, Éclat & Intense'],
+  'soin-capillaire-aubiere/': ['Soins Davines', 'Le soin adapté à vos cheveux'],
+  'diagnostic-capillaire-aubiere/': ['Diagnostic capillaire', '15 minutes pour définir votre projet'],
+  'tarifs/': ['Tous les tarifs', 'La carte complète'],
+  'conseil-coupe/': ['Quelle coupe pour moi ?', 'Le questionnaire en 2 minutes'],
+  'boutique/': ['La boutique Davines', 'Click and collect au salon'],
+  'carte-cadeau/': ['Carte cadeau', 'Offrir un moment au salon'],
+  'qui-suis-je/': ['Qui suis-je ?', 'Sandy, votre coiffeuse'],
+  'realisations/': ['Réalisations', 'Coupes, couleurs, balayages'],
+  'avis/': ['Avis clients', `${salon.rating.value}/5 sur Planity`],
+  'faq/': ['Questions fréquentes', 'Réservation, prestations, boutique'],
+  'contact/': ['Contact & accès', 'Plan, horaires, stationnement'],
+};
 
-export function hoursTable() {
-  return html`<table class="hours" data-hours>
-            <caption class="visually-hidden">Horaires d’ouverture</caption>
-            <tbody>
-              ${salon.hours.map((day) => html`<tr data-day="${day.day}"><th scope="row">${day.name}</th><td>${day.open ? `${day.open} – ${day.close}` : 'Fermé'}</td></tr>`)}
-            </tbody>
-          </table>`;
-}
-
-export function directions() {
-  return html`<ul class="directions">
-            <li><a class="btn" href="${salon.links.googleDirections}"${external} data-track="itineraire">${icon('navigation')} Google Maps</a></li>
-            <li><a class="btn" href="${salon.links.waze}"${external} data-track="itineraire">${icon('navigation')} Waze</a></li>
-            <li><a class="btn" href="${salon.links.applePlans}"${external} data-track="itineraire">${icon('navigation')} Plans</a></li>
-            <li><a class="btn" href="${salon.links.planity}"${external} data-track="planity">${icon('arrow-up-right')} Planity</a></li>
-          </ul>`;
-}
-
-export function visit(ctx, { titleTag = 'h2', kickerText = 'Venir au salon', map = true } = {}) {
-  return html`<section class="section visit" aria-labelledby="visit-title" data-fab-hide>
+export function related(ctx, routes, { title = html`À voir <em>aussi</em>` } = {}) {
+  return html`<section class="section" aria-labelledby="related-title">
       <header class="section__head">
-        ${kicker(kickerText)}
-        ${displayTitle(['4 bis rue', 'Champvoisin'], { tag: titleTag, id: 'visit-title', className: 'visit__title' })}
-        <p class="visit__city">63170 Aubière <span>— à 3,7 km de Clermont-Ferrand, près du campus des Cézeaux</span></p>
+        <h2 id="related-title" class="h3">${title}</h2>
       </header>
-      <div class="${map ? 'visit__grid' : 'visit__grid visit__grid--nomap'}">
-        ${map ? html`<div class="map" data-map data-lat="${salon.geo.lat}" data-lng="${salon.geo.lng}">
-          <a class="map__fallback" href="${salon.links.googleMaps}"${external}>
-            ${icon('pin', 'icon--lg')}
-            <span>Voir le plan</span>
-          </a>
-        </div>` : ''}
-        <div class="visit__info">
-          <h3 class="visit__label">Itinéraire</h3>
-          ${directions()}
-          ${phoneLink('btn btn--solid', 'Appeler le salon')}
-        </div>
-        <div class="visit__info">
-          <h3 class="visit__label">Horaires</h3>
-          <p class="status-pill" data-open-status>Du lundi au samedi, sur rendez-vous</p>
-          ${hoursTable()}
-          <p class="small">${salon.hoursNote}</p>
-          <p class="small">Paiement : ${salon.payment.toLowerCase()}.</p>
-        </div>
-      </div>
+      <ul class="related">
+        ${routes.map((route) => html`<li><a href="${ctx.rel(route)}"><span>${PAGES[route][0]}<small>${PAGES[route][1]}</small></span>${icon('arrow-right')}</a></li>`)}
+      </ul>
     </section>`;
+}
+
+// ---------- Produits ----------
+
+export const bottle = (item) => raw(bottleSvg(item, lines[item.line].tint));
+
+export function productMini(ctx, ids) {
+  return html`<ul class="pmini">
+        ${ids.map(product).map((item) => html`<li data-reveal><a href="${ctx.rel('boutique/')}#${item.id}">
+          ${bottle(item)}
+          <span><strong>${item.name}</strong><span>${item.size} · ${item.price.toFixed(2).replace('.', ',')} €</span></span>
+        </a></li>`)}
+      </ul>`;
 }
 
 // ---------- Alerte dernière minute ----------
 
 export function flash(ctx) {
   const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  return html`<section id="flash" class="section flash" aria-labelledby="flash-title" data-fab-hide>
-      <div class="flash__card">
-        <div class="flash__intro">
-          <p class="kicker">Alerte annulations ${icon('bolt', 'flash__bolt')}</p>
-          ${displayTitle(['Dernière', 'minute.'], { id: 'flash-title' })}
-          <p class="flash__text">Un rendez-vous annulé, un créneau qui se libère ? Inscrivez-vous : on vous prévient en priorité, par SMS ou par e-mail, et vous réservez avant tout le monde.</p>
+  return html`<section id="derniere-minute" class="section" aria-labelledby="flash-title">
+      <div class="flash-card">
+        <div>
+          ${kicker('Alerte annulations')}
+          <h2 id="flash-title" data-split>Un créneau <em>se libère</em> ?</h2>
+          <p class="lead" style="margin-top:1.25rem">Inscrivez-vous : on vous prévient en priorité, par SMS ou par e-mail, quand un rendez-vous est annulé.</p>
           <ul class="ticks">
             <li>${icon('check')} Gratuit et sans engagement</li>
             <li>${icon('check')} Uniquement des créneaux libérés, jamais de publicité</li>
@@ -362,11 +494,13 @@ export function flash(ctx) {
           </ul>
         </div>
 
-        <form class="flash__form" data-flash-form novalidate>
-          <fieldset class="segmented">
+        <form class="form" data-flash-form novalidate>
+          <fieldset>
             <legend>On vous prévient par</legend>
-            <label><input type="radio" name="canal" value="sms" checked><span>SMS</span></label>
-            <label><input type="radio" name="canal" value="email"><span>E-mail</span></label>
+            <div class="pills">
+              <label><input type="radio" name="canal" value="sms" checked><span>SMS</span></label>
+              <label><input type="radio" name="canal" value="email"><span>E-mail</span></label>
+            </div>
           </fieldset>
           <div class="field">
             <label for="flash-contact" data-contact-label>Votre numéro de mobile</label>
@@ -374,7 +508,7 @@ export function flash(ctx) {
             <p id="flash-contact-error" class="field__error" data-error-for="contact" hidden></p>
           </div>
           <div class="field">
-            <label for="flash-name">Prénom</label>
+            <label for="flash-name">Prénom <span class="optional">(facultatif)</span></label>
             <input id="flash-name" class="input" name="prenom" type="text" autocomplete="given-name">
           </div>
           <div class="field">
@@ -383,140 +517,33 @@ export function flash(ctx) {
               ${['Peu importe', 'Coupe & brushing femme', 'Brushing', 'Couleur ou gloss', 'Balayage', 'Coupe homme', 'Coupe enfant', 'Diagnostic'].map((option) => html`<option>${option}</option>`)}
             </select>
           </div>
-          <fieldset class="checks">
+          <fieldset>
             <legend>Vos jours possibles</legend>
-            ${days.map((day) => html`<label><input type="checkbox" name="jours" value="${day}"><span>${day.slice(0, 3)}</span></label>`)}
+            <div class="pills">
+              ${days.map((day) => html`<label><input type="checkbox" name="jours" value="${day}"><span>${day.slice(0, 3)}.</span></label>`)}
+            </div>
           </fieldset>
-          <fieldset class="checks">
+          <fieldset>
             <legend>Plutôt</legend>
-            ${['Peu importe', 'Le matin', 'L’après-midi'].map((moment, index) => html`<label><input type="radio" name="moment" value="${moment}"${index === 0 ? raw(' checked') : ''}><span>${moment}</span></label>`)}
+            <div class="pills">
+              ${['Peu importe', 'Le matin', 'L’après-midi'].map((moment, index) => html`<label><input type="radio" name="moment" value="${moment}"${index === 0 ? raw(' checked') : ''}><span>${moment}</span></label>`)}
+            </div>
           </fieldset>
-          <p class="visually-hidden" aria-hidden="true"><label>Ne pas remplir <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
+          <p class="trap" aria-hidden="true"><label>Ne pas remplir <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
           <label class="consent">
             <input type="checkbox" name="consentement" required aria-describedby="flash-consent-error">
             <span>J’accepte qu’Un Brun d’Hair me contacte au sujet des créneaux libérés. Désinscription possible à tout moment.</span>
           </label>
           <p id="flash-consent-error" class="field__error" data-error-for="consentement" hidden></p>
-          <button class="btn btn--solid btn--block" type="submit">${icon('bolt')} M’inscrire à l’alerte</button>
+          <button class="btn btn--primary btn--block" type="submit">M’inscrire à l’alerte</button>
           <p class="form-note">Vos coordonnées servent uniquement à vous prévenir d’un créneau libéré. <a href="${ctx.rel('confidentialite/')}">Données personnelles</a></p>
         </form>
 
-        <div class="flash__done" data-flash-done hidden tabindex="-1">
-          <p class="display flash__done-title"><span class="line">C’est</span> <span class="line line--accent">noté.</span></p>
+        <div class="done" data-flash-done hidden tabindex="-1">
+          <p class="done__title">C’est noté.</p>
           <p data-flash-done-message></p>
         </div>
       </div>
-    </section>`;
-}
-
-// ---------- Carte cadeau ----------
-
-const OCCASIONS = [
-  ['noel', 'Joyeux Noël.', 'bubblegum', 'Noël'],
-  ['saint-valentin', 'Avec amour.', 'chalk', 'Saint-Valentin'],
-  ['fete-des-meres', 'Bonne fête, maman.', 'blush', 'Fête des mères'],
-  ['fete-des-peres', 'Bonne fête, papa.', 'blush', 'Fête des pères'],
-  ['anniversaire', 'Joyeux anniversaire.', 'chalk', 'Anniversaire'],
-  ['juste', 'Pour toi.', 'bubblegum', 'Juste comme ça'],
-];
-
-export function gift(ctx, { titleTag = 'h2', kickerText = 'Carte cadeau', more = false } = {}) {
-  return html`<section id="offrir" class="section gift" aria-labelledby="gift-title" data-fab-hide>
-      <div class="gift__grid">
-        <div class="gift__text">
-          ${kicker(kickerText)}
-          ${displayTitle(['Offrir.'], { tag: titleTag, id: 'gift-title', className: 'gift__title' })}
-          <p class="lead">Un moment rien qu’à soi, ça s’offre. La carte cadeau s’achète en ligne en quelques clics, ou directement au salon.</p>
-          <p class="countdown" data-countdown hidden></p>
-          <fieldset class="checks gift__occasions" data-occasions>
-            <legend>L’occasion</legend>
-            ${OCCASIONS.map(([value, title, theme, label]) => html`<label><input type="radio" name="occasion" value="${value}" data-title="${title}" data-theme="${theme}"${value === 'juste' ? raw(' checked') : ''}><span>${label}</span></label>`)}
-          </fieldset>
-          <div class="gift__ideas">
-            <p>Une idée de montant ?</p>
-            <ul>
-              <li><span>Un brushing</span> <strong>${startingPrice('femme', 1)}</strong></li>
-              <li><span>Une coupe</span> <strong>${startingPrice('femme', 0)}</strong></li>
-              <li><span>Un gloss</span> <strong>${startingPrice('couleur')}</strong></li>
-              <li><span>Un balayage</span> <strong>${startingPrice('balayage')}</strong></li>
-            </ul>
-          </div>
-          <div class="gift__actions">
-            ${circleLink({ id: 'ring-gift', ringText: 'OFFRIR · CARTE CADEAU · OFFRIR · CARTE CADEAU ·', label: 'Acheter une carte cadeau sur Planity', iconName: 'gift', newTab: true })}
-            <p>Achat en ligne sur Planity : cliquez sur <strong>« Offrir »</strong> depuis la page du salon. Au salon : carte bancaire ou espèces.</p>
-          </div>
-          ${more ? html`<a class="link-arrow" href="${ctx.rel('carte-cadeau/')}">Tout sur la carte cadeau ${icon('arrow-right')}</a>` : ''}
-        </div>
-        <div class="gift__visual" aria-hidden="true">
-          <div class="giftcard" data-giftcard data-theme="bubblegum">
-            <p class="giftcard__label">Carte cadeau</p>
-            <p class="giftcard__title" data-giftcard-title>Pour toi.</p>
-            <div class="giftcard__foot">
-              <p class="giftcard__brand">Un Brun d’Hair</p>
-              <p class="giftcard__meta">4 bis rue Champvoisin · Aubière</p>
-            </div>
-            <svg class="giftcard__bolt"><use href="#i-bolt"/></svg>
-          </div>
-        </div>
-      </div>
-    </section>`;
-}
-
-// ---------- Divers ----------
-
-export function marquee(items, { big = false } = {}) {
-  const track = [...items, ...items].map((item) => html`<span>${item}</span>`);
-  return html`<div class="${big ? 'marquee marquee--big' : 'marquee'}" aria-hidden="true">
-      <div class="marquee__track">${track}</div>
-    </div>`;
-}
-
-export function social() {
-  return html`<section class="social" aria-labelledby="social-title">
-      <h2 id="social-title" class="visually-hidden">Suivre Un Brun d’Hair sur les réseaux</h2>
-      ${marquee(['@unbrundhair', '@unbrundhair', '@unbrundhair', '@unbrundhair'], { big: true })}
-      <div class="social__body">
-        <p>Réalisations en vidéo, coulisses du salon et horaires de la semaine : tout se passe sur les réseaux.</p>
-        <ul class="social__links">
-          <li><a class="btn" href="${salon.links.instagram}"${external}>${icon('instagram')} Voir Instagram</a></li>
-          <li><a class="btn" href="${salon.links.tiktok}"${external}>${icon('tiktok')} TikTok</a></li>
-        </ul>
-      </div>
-    </section>`;
-}
-
-// Liste des prestations, avec un lien vers chaque page détaillée.
-export function servicesList(ctx, { lines = ['Les', 'prestations.'], kickerText = 'Prestations & tarifs', titleTag = 'h2' } = {}) {
-  const items = [
-    { id: 'femme', title: 'Coupe & brushing femme', text: `Brushing ${startingPrice('femme', 1)}, coupe et brushing ${startingPrice('femme', 0)}. Conseils personnalisés à chaque rendez-vous.` },
-    { id: 'couleur', title: 'Coloration & gloss', text: 'Racines, éclat, reflets neutralisés et premiers cheveux blancs estompés.' },
-    { id: 'balayage', title: 'Balayage', text: 'Lumières & Subtil ou Éclat & Intense, toujours après un diagnostic.' },
-    { id: 'homme', title: 'Coupe homme', text: 'Shampoing, coupe et coiffage, adaptés à vos envies.' },
-    { id: 'enfant', title: 'Coupe enfant', text: 'Pour les moins de 12 ans, dans une ambiance calme et bienveillante.' },
-    { id: 'soin', title: 'Soins Davines', text: 'Le soin adapté aux besoins de vos cheveux, en complément de votre prestation.' },
-    { id: 'diagnostic', title: 'Diagnostic capillaire', text: `${durationOf('diagnostic')} pour définir votre projet. Les ${priceOf('diagnostic')} sont déduits de votre prestation.` },
-  ];
-  return html`<section class="section services" aria-labelledby="services-title">
-      <header class="section__head services__head">
-        <div>
-          ${kicker(kickerText)}
-          ${displayTitle(lines, { tag: titleTag, id: 'services-title' })}
-        </div>
-        <p data-reveal>Tarifs TTC. Les prix « dès » s’ajustent à votre chevelure et à votre projet. <a href="${ctx.rel('tarifs/')}">Voir toute la carte</a></p>
-      </header>
-      <ul class="services__list">
-        ${items.map((item) => {
-          const cat = category(item.id);
-          return html`<li class="service">
-          <a class="service__link" href="${ctx.rel(cat.page)}${cat.anchor ? `#${cat.anchor}` : ''}">
-            <span class="service__title">${item.title}</span>
-            <span class="service__text">${item.text}</span>
-            <span class="service__price">${startingPrice(item.id)}</span>
-            ${icon('arrow-right', 'service__arrow')}
-          </a>
-        </li>`;
-        })}
-      </ul>
     </section>`;
 }
 

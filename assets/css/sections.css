@@ -245,7 +245,6 @@
   gap: 1.75rem;
   padding-block: clamp(36px, 5vw, 64px);
   border-top: 2px solid var(--ink);
-  scroll-margin-top: 90px;
 }
 
 .cat--highlight {
@@ -1369,7 +1368,6 @@
   font-stretch: 62%;
   line-height: 0.9;
   text-transform: uppercase;
-  scroll-margin-top: 96px;
 }
 
 .prose ul {

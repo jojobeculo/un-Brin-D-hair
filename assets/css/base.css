@@ -9,8 +9,15 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-behavior: smooth;
   scroll-padding-top: 96px;
+}
+
+/* Défilement doux pour les liens vers une section de la page. Pas pour l’ancre d’une page
+   qui s’ouvre : Chrome calculerait la position avant la fin de la mise en page. */
+@media (prefers-reduced-motion: no-preference) {
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
 }
 
 html:has(dialog[open]) {
@@ -282,10 +289,6 @@ mark {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {

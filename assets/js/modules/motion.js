@@ -1,12 +1,13 @@
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-// Découpe un texte en lettres, chacune avec sa position (--i), pour les animer en cascade.
+// Découpe un texte en lettres, chacune avec sa position (--i, à partir de `start`), pour les animer en cascade.
 // Les lettres d’un même mot restent groupées : un mot ne se coupe jamais en fin de ligne.
-function splitChars(element) {
+// Renvoie la position qui suit la dernière lettre.
+function splitChars(element, start = 0) {
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
   const texts = [];
   while (walker.nextNode()) texts.push(walker.currentNode);
-  let index = 0;
+  let index = start;
   texts.forEach((node) => {
     const fragment = document.createDocumentFragment();
     node.textContent.split(/(\s+)/).forEach((part) => {
@@ -30,18 +31,18 @@ function splitChars(element) {
     node.replaceWith(fragment);
   });
   element.classList.add('is-split');
+  return index;
 }
 
+// Seules les lignes visibles du titre sont découpées : les lecteurs d’écran lisent son texte masqué.
 function splitHeroTitle() {
   const title = document.querySelector('.hero__title');
   if (!title) return;
-  // Les lecteurs d’écran lisent le titre entier, pas une suite de lettres.
-  const label = document.createElement('span');
-  label.className = 'visually-hidden';
-  label.textContent = title.textContent.replace(/\s+/g, ' ').trim();
-  title.querySelectorAll('.line').forEach((line) => line.setAttribute('aria-hidden', 'true'));
-  splitChars(title);
-  title.prepend(label);
+  let index = 0;
+  title.querySelectorAll('.line').forEach((line) => {
+    index = splitChars(line, index);
+  });
+  title.classList.add('is-split');
 }
 
 // Les bandeaux défilants accélèrent avec le défilement de la page, suivent son sens et s’inclinent.

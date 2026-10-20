@@ -6,9 +6,13 @@
 
 /* Conteneurs de référence pour la taille des titres d’affichage. */
 .hero,
+.page-hero,
 .section__head,
 .section__head > div,
 .reserve,
+.cta-band__text,
+.contact__intro,
+.contact__done,
 .flash__intro,
 .flash__done,
 .avis__head,
@@ -746,10 +750,12 @@
   gap: 1.5rem;
 }
 
+/* L’écart laisse la place au glissement des lignes du titre (10 %, voir « Mouvement »). */
 @media (min-width: 900px) {
   .gallery__head {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: end;
+    column-gap: clamp(2rem, 7vw, 6rem);
   }
 }
 
@@ -1092,6 +1098,14 @@
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     align-items: start;
   }
+
+  .visit__grid .map {
+    grid-row: span 2;
+  }
+
+  .visit__grid--nomap {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 .map {
@@ -1163,6 +1177,10 @@
 
 .visit__label:first-child {
   margin-top: 0;
+}
+
+.visit__info .directions {
+  margin-bottom: 1.5rem;
 }
 
 .directions {
@@ -1360,6 +1378,10 @@
   padding-left: 1.2rem;
 }
 
+.prose .action-links {
+  padding-left: 0;
+}
+
 .footer--compact {
   padding-block: 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
 }
@@ -1368,6 +1390,529 @@
   margin-top: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+/* ---------- Pages intérieures : fil d’Ariane et en-tête ---------- */
+
+/* Fil d’Ariane : centré entre les deux cercles du haut, sans barre de navigation. */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--corner-offset) * 2 + var(--circle));
+  padding: var(--corner-offset) calc(var(--corner-offset) + var(--circle) + 12px);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.breadcrumb ol {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem 0.5rem;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  margin-right: 0.5rem;
+  color: var(--magenta);
+  font-weight: 700;
+}
+
+.breadcrumb [aria-current] {
+  font-weight: 700;
+}
+
+/* Le fil d’Ariane occupe déjà le haut de l’écran. */
+.breadcrumb + .section {
+  padding-top: clamp(16px, 3vw, 40px);
+}
+
+.page-hero {
+  display: grid;
+  gap: clamp(20px, 3vw, 32px);
+  padding: clamp(16px, 4vw, 48px) var(--gutter) clamp(48px, 8vw, 96px);
+}
+
+.page-hero .kicker {
+  margin-bottom: 0;
+}
+
+.page-hero__title {
+  font-size: min(12rem, 100cqi / var(--fit, 4.5));
+}
+
+.page-hero__title .line {
+  animation: hero-line 1s var(--ease-out) both;
+}
+
+.page-hero__title .line:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.page-hero__title .line:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.page-hero__lead,
+.page-hero__actions {
+  animation: fade-up 1s 0.3s var(--ease-out) both;
+}
+
+.page-hero__lead {
+  max-width: 34ch;
+}
+
+.page-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+@media (min-width: 960px) {
+  .page-hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: 3rem;
+  }
+
+  .page-hero .kicker,
+  .page-hero__title {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- Accueil : pourquoi le salon ---------- */
+
+.why__list {
+  margin-top: clamp(32px, 5vw, 56px);
+}
+
+.why__item {
+  display: grid;
+  gap: 0.5rem 2rem;
+  padding-block: clamp(24px, 3vw, 40px);
+  border-top: 2px solid var(--ink);
+  container-type: inline-size;
+}
+
+.why__word {
+  max-width: none;
+  color: var(--magenta);
+  font-family: var(--font-display);
+  /* Le plus long mot (« Diagnostic », 4,3 em) fixe la taille de tous. */
+  font-size: min(8rem, 100cqi / 4.8);
+  font-weight: 900;
+  font-stretch: 62%;
+  line-height: 0.8;
+  text-transform: uppercase;
+  transition: translate 0.5s var(--ease-out);
+}
+
+.why__item:hover .why__word {
+  translate: 0.06em 0;
+}
+
+.why__item h3 {
+  font-size: 1.375rem;
+}
+
+.why__more {
+  margin-top: 2rem;
+}
+
+@media (min-width: 900px) {
+  .why__item {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+  }
+
+  .why__word {
+    grid-row: span 2;
+    font-size: min(8rem, (100cqi - 2rem) * 7 / 12 / 4.8);
+  }
+}
+
+/* ---------- Accueil : liste des prestations ---------- */
+
+.services__head {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .services__head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    column-gap: clamp(2rem, 7vw, 6rem);
+  }
+}
+
+.services__list {
+  margin-top: clamp(32px, 5vw, 56px);
+  border-top: 2px solid var(--ink);
+}
+
+.service {
+  border-bottom: 2px solid var(--ink);
+}
+
+.service__link {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-areas:
+    "title arrow"
+    "text arrow"
+    "price arrow";
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 0.4rem 1.25rem;
+  padding-block: 1.25rem;
+  text-decoration: none;
+}
+
+.service__link::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px;
+  z-index: -1;
+  background: var(--blush);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.service__link:hover::before {
+  transform: scaleY(1);
+}
+
+.service__title {
+  grid-area: title;
+  color: var(--magenta);
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+  font-weight: 900;
+  font-stretch: 62%;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.service__text {
+  grid-area: text;
+  max-width: 46ch;
+}
+
+.service__price {
+  grid-area: price;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.service__arrow {
+  grid-area: arrow;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border-radius: 50%;
+  background: var(--magenta);
+  color: var(--black);
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.service__link:hover .service__arrow {
+  transform: rotate(-45deg);
+}
+
+@media (min-width: 900px) {
+  .service__link {
+    grid-template-areas: "title text price arrow";
+    grid-template-columns: minmax(0, 5fr) minmax(0, 5fr) minmax(7rem, auto) var(--circle);
+    gap: 2rem;
+  }
+
+  .service__price {
+    text-align: right;
+  }
+
+  .service__arrow {
+    width: var(--circle);
+    height: var(--circle);
+    padding: 12px;
+  }
+}
+
+/* ---------- Pages de prestations ---------- */
+
+.detail {
+  display: grid;
+  gap: clamp(32px, 5vw, 64px);
+}
+
+.detail__body {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.detail__body > p {
+  font-size: 1.1875rem;
+}
+
+.detail__body > p:first-child {
+  font-size: clamp(1.25rem, 2vw, 1.625rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.detail__body .steps,
+.detail__body .warning,
+.detail__body .lengths {
+  margin-top: 1rem;
+}
+
+@media (min-width: 960px) {
+  .detail {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+  }
+
+  .detail .section__head {
+    position: sticky;
+    top: 100px;
+  }
+}
+
+.steps--compact .steps__num {
+  font-size: clamp(3rem, 6vw, 4.5rem);
+}
+
+.rdv .steps {
+  margin-top: clamp(32px, 5vw, 56px);
+}
+
+@media (min-width: 900px) {
+  .steps--compact {
+    display: block;
+  }
+
+  .steps--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .steps--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cat__more {
+  margin-top: 1.25rem;
+}
+
+.avis--compact .quotes {
+  margin-top: clamp(32px, 5vw, 56px);
+}
+
+.avis__more {
+  margin-top: 1.5rem;
+}
+
+/* ---------- Questions fréquentes ---------- */
+
+.faq__list {
+  max-width: 64rem;
+  margin-top: clamp(32px, 5vw, 56px);
+  border-top: 2px solid var(--ink);
+}
+
+.faq__item {
+  border-bottom: 2px solid var(--ink);
+  interpolate-size: allow-keywords;
+}
+
+.faq__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 1.25rem;
+  font-size: clamp(1.1875rem, 2.2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.25;
+  list-style: none;
+  cursor: pointer;
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__chevron {
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border-radius: 50%;
+  background: var(--magenta);
+  color: var(--black);
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.faq__item[open] .faq__chevron {
+  transform: rotate(180deg);
+}
+
+.faq__answer {
+  padding-bottom: 1.5rem;
+}
+
+/* Ouverture en douceur (navigateurs récents ; ailleurs, la réponse s’affiche d’un coup). */
+.faq__item::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition: block-size 0.5s var(--ease-out), content-visibility 0.5s allow-discrete;
+}
+
+.faq__item[open]::details-content {
+  block-size: auto;
+}
+
+/* ---------- Bandeau de réservation (fin de page) ---------- */
+
+.cta-band__inner {
+  display: grid;
+  gap: clamp(32px, 5vw, 56px);
+  padding: clamp(28px, 6vw, 80px);
+  background: var(--blush);
+}
+
+.cta-band__text {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.cta-band__text p {
+  font-size: 1.1875rem;
+}
+
+.cta-band__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 2.5rem;
+}
+
+.action-links {
+  display: grid;
+  gap: 0.6rem;
+}
+
+@media (min-width: 960px) {
+  .cta-band__inner {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+  }
+}
+
+/* ---------- Le salon ---------- */
+
+.sandy__grid {
+  display: grid;
+  gap: clamp(32px, 5vw, 64px);
+}
+
+.sandy__body {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.sandy .quotes {
+  margin-top: clamp(48px, 7vw, 96px);
+}
+
+@media (min-width: 960px) {
+  .sandy__grid {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+  }
+}
+
+/* ---------- Galerie ---------- */
+
+.latest .lead {
+  margin-block: 1.5rem 2rem;
+}
+
+/* ---------- Contact ---------- */
+
+.contact__grid {
+  display: grid;
+  gap: clamp(32px, 5vw, 64px);
+}
+
+.contact__intro {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+
+.contact__intro .kicker {
+  margin-bottom: 0;
+}
+
+.contact__form,
+.contact__done {
+  display: grid;
+  gap: 1.35rem;
+  padding: clamp(20px, 3vw, 36px);
+  background: var(--blush);
+}
+
+.contact__done {
+  align-content: center;
+  outline: none;
+}
+
+.contact__done-title {
+  --fit: 3.6;
+}
+
+@media (min-width: 960px) {
+  .contact__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.zone__title {
+  max-width: 18ch;
+  margin-bottom: 1.25rem;
+  color: var(--magenta);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 900;
+  font-stretch: 62%;
+  line-height: 0.84;
+  text-transform: uppercase;
+}
+
+.zone__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.zone__list li {
+  padding: 0.35em 0.9em;
+  border-radius: 999px;
+  background: var(--blush);
+  font-weight: 500;
 }
 
 /* =========================================================

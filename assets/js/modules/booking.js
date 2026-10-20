@@ -1,20 +1,22 @@
-import { CONFIG } from '../config.js';
 import { readHours, nextOpenDays, slotsFor, salonNow, formatTime } from '../lib/hours.js';
+import { readSalonData } from '../lib/data.js';
+import { formatDuration, formatPrice } from '../lib/format.js';
 import { sendRequest, copyText } from '../lib/channel.js';
 import { validateForm, resetErrors } from '../lib/forms.js';
 import { toast } from '../lib/toast.js';
 
 const DAYS_SHOWN = 14;
 
+// `diagnostic` : la prestation « Diagnostic capillaire » de la carte (durée et prix affichés).
 const GATES = {
   diagnostic: {
     question: 'Avez-vous déjà fait votre diagnostic au salon ?',
-    text: 'Avant un balayage, une consultation préalable est obligatoire. Elle se fait sur un autre jour que la prestation.',
+    text: () => 'Avant un balayage, une consultation préalable est obligatoire. Elle se fait sur un autre jour que la prestation.',
     blocking: true,
   },
   eclaircissement: {
     question: 'Votre projet couleur demande un éclaircissement ?',
-    text: 'Dans ce cas, un diagnostic préalable est obligatoire (15 min · 15 €, déduits ensuite), sur un autre jour que la couleur.',
+    text: (diagnostic) => `Dans ce cas, un diagnostic préalable est obligatoire (${formatDuration(diagnostic.duration)} · ${formatPrice(diagnostic.price)}, déduits ensuite), sur un autre jour que la couleur.`,
     blocking: false,
   },
 };
@@ -30,17 +32,6 @@ const longDate = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numer
 const shortWeekday = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', timeZone: 'UTC' });
 const shortMonth = new Intl.DateTimeFormat('fr-FR', { month: 'short', timeZone: 'UTC' });
 
-function formatDuration(minutes) {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  if (!hours) return `${rest}\u00a0min`;
-  return rest ? `${hours}\u00a0h\u00a0${String(rest).padStart(2, '0')}` : `${hours}\u00a0h`;
-}
-
-function formatPrice(euros, from) {
-  return `${from ? 'dès ' : ''}${euros}\u00a0€`;
-}
-
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -48,29 +39,13 @@ function el(tag, className, text) {
   return node;
 }
 
-// La carte des prestations (index.html) est la source des données : data-service, data-duration…
+// Carte des prestations de src/data/services.mjs.
 function readCatalog() {
   const services = new Map();
-  const categories = [...document.querySelectorAll('[data-category]')].map((element) => {
-    const category = {
-      id: element.dataset.category,
-      label: element.dataset.label,
-      options: (element.dataset.options || '').split(' ').filter(Boolean),
-      gate: GATES[element.dataset.gate] || null,
-      bookable: element.dataset.bookable !== 'false',
-      featured: element.hasAttribute('data-featured'),
-      services: [],
-    };
-    element.querySelectorAll('[data-service]').forEach((row) => {
-      const service = {
-        id: row.dataset.service,
-        name: row.dataset.name,
-        hint: row.dataset.hint || '',
-        duration: Number(row.dataset.duration),
-        price: Number(row.dataset.price),
-        from: row.hasAttribute('data-from'),
-        category,
-      };
+  const categories = (readSalonData().categories || []).map((data) => {
+    const category = { ...data, gate: GATES[data.gate] || null, services: [] };
+    data.services.forEach((item) => {
+      const service = { ...item, category };
       services.set(service.id, service);
       category.services.push(service);
     });
@@ -223,11 +198,12 @@ export function initBooking() {
     const { gate } = state.service.category;
     ui.gate.hidden = !gate;
     if (!gate) return;
+    const diagnostic = services.get('diagnostic');
 
     const question = el('p', 'gate__question');
     question.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-warning"/></svg>';
     question.append(gate.question);
-    const parts = [question, el('p', '', gate.text)];
+    const parts = [question, el('p', '', gate.text(diagnostic))];
 
     if (gate.blocking) {
       const answers = el('div', 'gate__answers');
@@ -248,11 +224,11 @@ export function initBooking() {
     if (!gate.blocking || state.gateAnswer === 'todo') {
       const advice = el('div', 'gate__advice');
       if (gate.blocking) {
-        advice.append(el('p', '', 'Commençons par là : 15 minutes pour analyser votre chevelure et construire votre projet. Les 15 € sont déduits de votre balayage.'));
+        advice.append(el('p', '', `Commençons par là : ${formatDuration(diagnostic.duration)} pour analyser votre chevelure et construire votre projet. Les ${formatPrice(diagnostic.price)} sont déduits de votre balayage.`));
       }
       const book = el('button', 'btn btn--ink', 'Réserver mon diagnostic d’abord');
       book.type = 'button';
-      book.addEventListener('click', () => choose(services.get('diagnostic')));
+      book.addEventListener('click', () => choose(diagnostic));
       advice.append(book);
       parts.push(advice);
     }
@@ -403,7 +379,7 @@ export function initBooking() {
       ui.doneMessage.textContent = DONE_MESSAGES[channel];
       go('done');
     } catch {
-      toast(`L’envoi n’a pas abouti. Appelez le salon au ${CONFIG.phoneDisplay}.`);
+      toast(`L’envoi n’a pas abouti. Appelez le salon au ${readSalonData().settings.phone}.`);
     } finally {
       submit.disabled = false;
     }
@@ -411,14 +387,19 @@ export function initBooking() {
 
   // ---------- Ouverture et fermeture ----------
 
-  function open(serviceId) {
+  // `target` : identifiant d’une prestation (étape 2 ou 3) ou d’une catégorie (étape 1, onglet ouvert).
+  function open(target) {
     reset();
     ui.form.reset();
     resetErrors(ui.form);
     dialog.showModal();
-    const service = services.get(serviceId);
-    if (service?.category.bookable) choose(service);
-    else go('1', { remember: false });
+    const service = services.get(target);
+    if (service?.category.bookable) {
+      choose(service);
+    } else {
+      if (categories.some((category) => category.id === target)) state.tab = target;
+      go('1', { remember: false });
+    }
     // Le bouton « retour » du téléphone ferme le tunnel au lieu de quitter le site.
     // Dans une iframe isolée (origine opaque), pushState échoue : le tunnel fonctionne alors sans.
     try {

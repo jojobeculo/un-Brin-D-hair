@@ -8,6 +8,9 @@ function errorFor(field) {
   if (!value) return 'Ce champ est obligatoire.';
   if (field.type === 'tel' && !PHONE.test(value)) return 'Numéro invalide : 10 chiffres, par exemple 06 12 34 56 78.';
   if (field.type === 'email' && !EMAIL.test(value)) return 'Adresse e-mail invalide, par exemple prenom@exemple.fr.';
+  if (field.dataset.validate === 'phone-or-email' && !PHONE.test(value) && !EMAIL.test(value)) {
+    return 'Indiquez un numéro de téléphone ou une adresse e-mail, par exemple 06 12 34 56 78.';
+  }
   return '';
 }
 

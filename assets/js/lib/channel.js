@@ -1,4 +1,4 @@
-import { CONFIG } from '../config.js';
+import { readSalonData } from './data.js';
 
 export function copyText(text) {
   return navigator.clipboard?.writeText(text).catch(() => {});
@@ -7,8 +7,11 @@ export function copyText(text) {
 // Envoie une demande au salon par le premier canal configuré.
 // Renvoie le canal utilisé : 'endpoint', 'sms', 'email' ou 'instagram'.
 export async function sendRequest({ subject, text, data }) {
-  if (CONFIG.formEndpoint) {
-    const response = await fetch(CONFIG.formEndpoint, {
+  // Champ piège (_gotcha) rempli : c’est un robot. Rien ne part, l’envoi semble réussi.
+  if (data._gotcha) return 'endpoint';
+  const { settings } = readSalonData();
+  if (settings.formEndpoint) {
+    const response = await fetch(settings.formEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ _subject: subject, message: text, ...data }),
@@ -18,18 +21,18 @@ export async function sendRequest({ subject, text, data }) {
   }
 
   const body = encodeURIComponent(text);
-  if (CONFIG.sms && matchMedia('(pointer: coarse)').matches) {
-    window.location.href = `sms:${CONFIG.sms}?&body=${body}`;
+  if (settings.sms && matchMedia('(pointer: coarse)').matches) {
+    window.location.href = `sms:${settings.sms}?&body=${body}`;
     return 'sms';
   }
-  if (CONFIG.email) {
-    window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent(subject)}&body=${body}`;
+  if (settings.email) {
+    window.location.href = `mailto:${settings.email}?subject=${encodeURIComponent(subject)}&body=${body}`;
     return 'email';
   }
 
   // Aucun canal configuré : le texte est copié et la conversation Instagram du salon s’ouvre.
   // Pas d’attente avant window.open, sinon le navigateur bloque la fenêtre.
   copyText(text);
-  window.open(`https://ig.me/m/${CONFIG.instagram}`, '_blank', 'noopener');
+  window.open(`https://ig.me/m/${settings.instagram}`, '_blank', 'noopener');
   return 'instagram';
 }

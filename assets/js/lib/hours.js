@@ -1,5 +1,6 @@
-import { CONFIG } from '../config.js';
+import { readSalonData } from './data.js';
 
+const TIME_ZONE = 'Europe/Paris';
 const WEEKDAYS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 const DAY_NAMES = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const SLOT_STEP = 30;
@@ -15,12 +16,11 @@ export function formatTime(minutes) {
   return `${hours}:${String(minutes % 60).padStart(2, '0')}`;
 }
 
-// Horaires lus dans le tableau [data-hours] : jour (0 = dimanche) -> [ouverture, fermeture] en minutes.
+// Horaires de src/data/salon.mjs : jour (0 = dimanche) -> [ouverture, fermeture] en minutes.
 export function readHours() {
   const hours = new Map();
-  document.querySelectorAll('[data-hours] [data-day]').forEach((row) => {
-    const { day, open, close } = row.dataset;
-    if (open && close) hours.set(Number(day), [toMinutes(open), toMinutes(close)]);
+  readSalonData().hours?.forEach(({ day, open, close }) => {
+    if (open && close) hours.set(day, [toMinutes(open), toMinutes(close)]);
   });
   return hours;
 }
@@ -29,7 +29,7 @@ export function readHours() {
 export function salonNow(date = new Date()) {
   const parts = {};
   new Intl.DateTimeFormat('en-GB', {
-    timeZone: CONFIG.timeZone,
+    timeZone: TIME_ZONE,
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',

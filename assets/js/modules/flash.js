@@ -1,7 +1,7 @@
+import { readSalonData } from '../lib/data.js';
 import { sendRequest } from '../lib/channel.js';
 import { validateForm, resetErrors } from '../lib/forms.js';
 import { toast } from '../lib/toast.js';
-import { CONFIG } from '../config.js';
 
 const DONE_MESSAGES = {
   endpoint: 'Votre inscription est enregistrée : dès qu’un créneau se libère, on vous prévient en priorité.',
@@ -45,6 +45,7 @@ export function initFlash() {
       prestation: data.get('prestation'),
       jours,
       moment: data.get('moment'),
+      _gotcha: data.get('_gotcha'),
     };
     const text = [
       'Inscription à l’alerte dernière minute — Un Brun d’Hair',
@@ -64,7 +65,7 @@ export function initFlash() {
       done.hidden = false;
       done.focus();
     } catch {
-      toast(`L’inscription n’a pas abouti. Appelez le salon au ${CONFIG.phoneDisplay}.`);
+      toast(`L’inscription n’a pas abouti. Appelez le salon au ${readSalonData().settings.phone}.`);
     } finally {
       submit.disabled = false;
     }

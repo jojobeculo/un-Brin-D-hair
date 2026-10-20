@@ -5,6 +5,6 @@ export function initMenu() {
 
   opener.addEventListener('click', () => menu.showModal());
   menu.querySelector('[data-menu-close]').addEventListener('click', () => menu.close());
-  // Le menu se ferme, puis le navigateur suit l’ancre du lien.
-  menu.querySelectorAll('a[href^="#"]').forEach((link) => link.addEventListener('click', () => menu.close()));
+  // Le menu se ferme avant de suivre une ancre ou d’ouvrir le tunnel de réservation.
+  menu.querySelectorAll('a[href^="#"], [data-book]').forEach((link) => link.addEventListener('click', () => menu.close()));
 }

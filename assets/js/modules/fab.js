@@ -1,7 +1,7 @@
-// Le bouton flottant « Réserver » s’efface là où la page propose déjà de réserver (bouton du hero, carte, formulaires…).
+// Le bouton flottant « Réserver » s’efface là où la page propose déjà de réserver ([data-fab-hide]) et sur le pied de page.
 export function initFab() {
   const fab = document.querySelector('[data-fab]');
-  const zones = document.querySelectorAll('.hero__actions, #carte, #reserver, #flash, #offrir, #venir, .footer');
+  const zones = document.querySelectorAll('[data-fab-hide], .footer');
   if (!fab || !zones.length) return;
 
   const visible = new Set();

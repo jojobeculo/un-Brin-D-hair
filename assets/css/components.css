@@ -643,6 +643,32 @@ select.input {
   }
 }
 
+/* Bouton WhatsApp : affiché seulement quand src/data/salon.mjs donne un numéro de mobile. */
+.fab-whatsapp {
+  position: fixed;
+  left: calc(var(--corner-offset) + env(safe-area-inset-left, 0px));
+  bottom: calc(var(--corner-offset) + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--magenta);
+  box-shadow: 0 0 0 2px var(--chalk);
+  color: var(--black);
+  transition: transform 0.45s var(--ease-spring);
+}
+
+.fab-whatsapp:hover {
+  transform: scale(1.1) rotate(-10deg);
+}
+
+.fab-whatsapp .icon {
+  width: 26px;
+  height: 26px;
+}
+
 /* ---------- Menu plein écran ---------- */
 
 .menu {
@@ -756,6 +782,25 @@ select.input {
 
 .menu__aside a:focus-visible {
   outline-color: var(--chalk);
+}
+
+/* Sur fond magenta, le bouton se remplit de blanc au survol. */
+.menu__book {
+  --sweep: var(--chalk);
+  justify-self: start;
+}
+
+.menu__book:hover {
+  border-color: var(--chalk);
+  color: var(--ink);
+}
+
+/* Texte blanc sur magenta : 19 px gras minimum. */
+.menu__services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  font-size: 1.1875rem;
 }
 
 .menu__social {

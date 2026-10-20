@@ -6,7 +6,7 @@ import { haircutSvg } from '../../assets/js/lib/haircut-art.js';
 import { icon } from '../components/icons.mjs';
 import { hairSalonSchema } from '../components/layout.mjs';
 import {
-  kicker, photo, bookButton, ribbon, orbs, wave, serviceCards, shots, SHOTS, rating, quotes, reviewLinks, instagram, visit, phoneLink, stars,
+  kicker, photo, bookButton, ribbon, orbs, wave, serviceCards, beforeAfter, rating, quotes, reviewLinks, instagram, visit, phoneLink, stars,
 } from '../components/blocks.mjs';
 
 export const route = '';
@@ -44,7 +44,7 @@ export default function accueil(ctx) {
         </div>
         <div class="hero__media">
           <span class="hero__monogram" aria-hidden="true">B</span>
-          <div class="arch" data-liquid data-cursor="Bonjour !">
+          <div class="arch" data-liquid data-cursor="Voir">
             ${photo(ctx, 'sandy-salon', { alt: 'Sandy devant la vitrine de son salon Un Brun d’Hair, rue Champvoisin à Aubière', sizes: '(min-width: 900px) 440px, 86vw', eager: true })}
           </div>
           <p class="hero__caption"><strong>Sandy</strong>Coiffeuse depuis ${salon.story.experienceYears} ans, à votre écoute</p>
@@ -90,18 +90,7 @@ export default function accueil(ctx) {
       </section>
     </div>
 
-    <section class="section" aria-labelledby="shots-title">
-      <header class="section__head section__head--split">
-        ${kicker('Réalisations')}
-        <h2 id="shots-title" data-split>Des cheveux qui <em>vous ressemblent</em></h2>
-        <p>Balayages lumineux, coupes nettes, brushings souples : un résultat naturel, facile à porter au quotidien.</p>
-      </header>
-      ${shots(ctx, SHOTS)}
-      <div class="section__foot">
-        <a class="link" href="${ctx.rel('realisations/')}">Voir les réalisations ${icon('arrow-right')}</a>
-        <p class="note">Photos d’illustration, en attendant les photos du salon.</p>
-      </div>
-    </section>
+    ${beforeAfter(ctx, ['balayage-lumieres', 'balayage-eclat'], { title: html`Des cheveux qui <em>vous ressemblent</em>`, intro: 'Balayages lumineux, couleurs, coupes nettes : glissez sur l’image pour voir la transformation.', more: ctx.rel('realisations/') })}
 
     <div class="band band--creme">
       <section class="section" aria-labelledby="avis-title">

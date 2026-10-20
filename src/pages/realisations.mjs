@@ -1,5 +1,5 @@
 import { html } from '../lib/html.mjs';
-import { pageHero, shots, SHOTS, instagram, cta, related, bookButton } from '../components/blocks.mjs';
+import { pageHero, shots, SHOTS, beforeAfter, instagram, cta, related, bookButton } from '../components/blocks.mjs';
 
 export const route = 'realisations/';
 
@@ -11,6 +11,8 @@ export default function realisations(ctx) {
       lead: 'Des transformations pensées pour chaque chevelure, jamais en série : un résultat naturel, lumineux et facile à porter au quotidien.',
       actions: html`${bookButton()}`,
     })}
+
+    ${beforeAfter(ctx)}
 
     <section class="section" aria-label="Galerie" style="padding-top:0">
       ${shots(ctx, SHOTS)}

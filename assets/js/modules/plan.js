@@ -2,6 +2,14 @@
 // (aucune requête vers Google avant le clic).
 export function initPlan() {
   document.querySelectorAll('[data-plan]').forEach((plan) => {
+    // Le fond de plan (52 Ko) ne se charge qu’à l’approche de la carte.
+    const base = plan.querySelector('[data-href]');
+    const loader = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      base.setAttribute('href', base.dataset.href);
+      loader.disconnect();
+    }, { rootMargin: '600px 0px' });
+    loader.observe(plan);
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
         plan.classList.add('is-in');

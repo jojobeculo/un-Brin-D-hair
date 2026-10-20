@@ -7,9 +7,10 @@ import { initPlan } from './modules/plan.js';
 import { initCartBadge } from './modules/cart-badge.js';
 import { initFlash } from './modules/flash.js';
 import { initContact } from './modules/contact.js';
+import { initCompare } from './modules/compare.js';
 
 // Chaque module démarre seul : une erreur dans l’un n’empêche pas les autres de fonctionner.
-[initMotion, initAmbient, initMenu, initStatus, initReveal, initPlan, initCartBadge, initFlash, initContact].forEach((init) => {
+[initMotion, initAmbient, initMenu, initStatus, initReveal, initPlan, initCartBadge, initFlash, initContact, initCompare].forEach((init) => {
   try {
     init();
   } catch (error) {
@@ -19,9 +20,9 @@ import { initContact } from './modules/contact.js';
 
 document.documentElement.classList.add('is-ready');
 
-// Effets riches seulement sur ordinateur (souris, écran large) et si les animations sont autorisées :
+// Effets riches seulement avec une souris et si les animations sont autorisées :
 // les téléphones ne téléchargent pas ce code.
-if (matchMedia('(pointer: fine) and (hover: hover) and (min-width: 1024px) and (prefers-reduced-motion: no-preference)').matches) {
+if (matchMedia('(pointer: fine) and (hover: hover) and (prefers-reduced-motion: no-preference)').matches) {
   import('./modules/fx.js').then((module) => module.initFx()).catch(console.error);
 }
 

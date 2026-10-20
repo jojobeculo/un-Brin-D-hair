@@ -41,6 +41,7 @@ export default function coloration(ctx) {
       { title: 'Coupe et brushing', text: 'Selon la formule choisie.' },
     ],
     categories: ['couleur', 'options'],
+    compares: ['gloss'],
     shots: ['couleur', 'boucles'],
     reviewsTag: 'couleur',
     products: ['minu-shampoo', 'minu-conditioner', 'alchemic-chocolate'],

@@ -48,7 +48,7 @@
         </ul>
       </nav>
       <div class="header__end">
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
         <a class="cart-link" href="boutique/#panier" data-cart-link hidden>
           <svg class="icon" aria-hidden="true"><use href="#i-bag"/></svg><span class="cart-link__count" data-cart-count>0</span><span class="visually-hidden">article(s) dans le panier</span>
         </a>
@@ -73,11 +73,29 @@
       </ul>
       <div class="menu__foot">
         <a class="btn btn--primary btn--block" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity">Je réserve sur Planity</a>
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
         <p>4 bis rue Champvoisin, 63170 Aubière<br><a href="tel:+33444448287" data-track="phone">04&nbsp;44&nbsp;44&nbsp;82&nbsp;87</a></p>
       </div>
     </div>
   </dialog>
+  <div id="horaires" class="hours-pop" popover aria-labelledby="horaires-title">
+    <div class="hours-pop__head">
+      <p id="horaires-title" class="hours-pop__title">Horaires <em>du salon</em></p>
+      <button class="hours-pop__close" type="button" popovertarget="horaires" popovertargetaction="hide"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg><span class="visually-hidden">Fermer les horaires</span></button>
+    </div>
+    <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+    <table class="hours" data-hours>
+            <caption class="visually-hidden">Horaires d’ouverture</caption>
+            <tbody>
+              <tr data-day="1"><th scope="row">Lundi</th><td>10&nbsp;h – 18&nbsp;h<sup>*</sup></td></tr><tr data-day="2"><th scope="row">Mardi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="3"><th scope="row">Mercredi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="4"><th scope="row">Jeudi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="5"><th scope="row">Vendredi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="6"><th scope="row">Samedi</th><td>9&nbsp;h – 16&nbsp;h<sup>*</sup></td></tr><tr data-day="0"><th scope="row">Dimanche</th><td>Fermé</td></tr>
+            </tbody>
+          </table>
+          <p class="small"><sup>*</sup> Une semaine sur deux. <span data-alt-week></span> Les créneaux exacts sont sur Planity.</p>
+    <div class="actions">
+      <a class="btn btn--primary btn--sm" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+      <a class="btn btn--sm" href="contact/#acces">Plan et accès</a>
+    </div>
+  </div>
 
   <main id="contenu">
     
@@ -110,7 +128,7 @@
         </div>
         <div class="hero__media">
           <span class="hero__monogram" aria-hidden="true">B</span>
-          <div class="arch" data-liquid data-cursor="Bonjour&nbsp;!">
+          <div class="arch" data-liquid data-cursor="Voir">
             <picture>
           <source type="image/avif" srcset="assets/img/photos/sandy-salon-480.avif 480w, assets/img/photos/sandy-salon-600.avif 600w" sizes="(min-width: 900px) 440px, 86vw">
           <img src="assets/img/photos/sandy-salon-600.webp" srcset="assets/img/photos/sandy-salon-480.webp 480w, assets/img/photos/sandy-salon-600.webp 600w" sizes="(min-width: 900px) 440px, 86vw" alt="Sandy devant la vitrine de son salon Un Brun d’Hair, rue Champvoisin à Aubière" width="600" height="800" fetchpriority="high" decoding="async">
@@ -165,8 +183,8 @@
         </header>
         <ul class="cards">
         <li data-reveal style="--stagger:0">
-          <a class="card" href="coupe-femme-aubiere/" data-cursor="Découvrir">
-            <div class="card__media"><picture>
+          <a class="card" href="coupe-femme-aubiere/" data-cursor="Explorer">
+            <div class="card__media" data-liquid><picture>
           <source type="image/avif" srcset="assets/img/photos/coupe-480.avif 480w, assets/img/photos/coupe-960.avif 960w, assets/img/photos/coupe-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
           <img src="assets/img/photos/coupe-960.webp" srcset="assets/img/photos/coupe-480.webp 480w, assets/img/photos/coupe-960.webp 960w, assets/img/photos/coupe-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="Coupe aux ciseaux sur cheveux bruns" width="1440" height="2160" loading="lazy" decoding="async">
         </picture></div>
@@ -177,8 +195,8 @@
             </div>
           </a>
         </li><li data-reveal style="--stagger:1">
-          <a class="card" href="coloration-aubiere/" data-cursor="Découvrir">
-            <div class="card__media"><picture>
+          <a class="card" href="coloration-aubiere/" data-cursor="Explorer">
+            <div class="card__media" data-liquid><picture>
           <source type="image/avif" srcset="assets/img/photos/couleur-480.avif 480w, assets/img/photos/couleur-960.avif 960w, assets/img/photos/couleur-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
           <img src="assets/img/photos/couleur-960.webp" srcset="assets/img/photos/couleur-480.webp 480w, assets/img/photos/couleur-960.webp 960w, assets/img/photos/couleur-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="Mise en forme de cheveux cuivrés" width="1440" height="961" loading="lazy" decoding="async">
         </picture></div>
@@ -189,8 +207,8 @@
             </div>
           </a>
         </li><li data-reveal style="--stagger:2">
-          <a class="card" href="balayage-aubiere/" data-cursor="Découvrir">
-            <div class="card__media"><picture>
+          <a class="card" href="balayage-aubiere/" data-cursor="Explorer">
+            <div class="card__media" data-liquid><picture>
           <source type="image/avif" srcset="assets/img/photos/boucles-480.avif 480w, assets/img/photos/boucles-960.avif 960w, assets/img/photos/boucles-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
           <img src="assets/img/photos/boucles-960.webp" srcset="assets/img/photos/boucles-480.webp 480w, assets/img/photos/boucles-960.webp 960w, assets/img/photos/boucles-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="Cheveux longs méchés blonds et bouclés" width="1440" height="961" loading="lazy" decoding="async">
         </picture></div>
@@ -201,8 +219,8 @@
             </div>
           </a>
         </li><li data-reveal style="--stagger:0">
-          <a class="card" href="coupe-homme-aubiere/" data-cursor="Découvrir">
-            <div class="card__media"><picture>
+          <a class="card" href="coupe-homme-aubiere/" data-cursor="Explorer">
+            <div class="card__media" data-liquid><picture>
           <source type="image/avif" srcset="assets/img/photos/outils-480.avif 480w, assets/img/photos/outils-960.avif 960w, assets/img/photos/outils-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
           <img src="assets/img/photos/outils-960.webp" srcset="assets/img/photos/outils-480.webp 480w, assets/img/photos/outils-960.webp 960w, assets/img/photos/outils-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="Ciseaux et brosses de coiffure sur un plan de travail" width="1440" height="960" loading="lazy" decoding="async">
         </picture></div>
@@ -213,8 +231,8 @@
             </div>
           </a>
         </li><li data-reveal style="--stagger:1">
-          <a class="card" href="soin-capillaire-aubiere/" data-cursor="Découvrir">
-            <div class="card__media"><picture>
+          <a class="card" href="soin-capillaire-aubiere/" data-cursor="Explorer">
+            <div class="card__media" data-liquid><picture>
           <source type="image/avif" srcset="assets/img/photos/soin-480.avif 480w, assets/img/photos/soin-960.avif 960w, assets/img/photos/soin-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
           <img src="assets/img/photos/soin-960.webp" srcset="assets/img/photos/soin-480.webp 480w, assets/img/photos/soin-960.webp 960w, assets/img/photos/soin-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="Shampoing au bac à shampoing" width="1440" height="2160" loading="lazy" decoding="async">
         </picture></div>
@@ -225,8 +243,8 @@
             </div>
           </a>
         </li><li data-reveal style="--stagger:2">
-          <a class="card" href="diagnostic-capillaire-aubiere/" data-cursor="Découvrir">
-            <div class="card__media"><picture>
+          <a class="card" href="diagnostic-capillaire-aubiere/" data-cursor="Explorer">
+            <div class="card__media" data-liquid><picture>
           <source type="image/avif" srcset="assets/img/photos/mise-en-forme-480.avif 480w, assets/img/photos/mise-en-forme-960.avif 960w, assets/img/photos/mise-en-forme-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
           <img src="assets/img/photos/mise-en-forme-960.webp" srcset="assets/img/photos/mise-en-forme-480.webp 480w, assets/img/photos/mise-en-forme-960.webp 960w, assets/img/photos/mise-en-forme-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="Coiffeuse qui travaille une coiffure attachée" width="1440" height="961" loading="lazy" decoding="async">
         </picture></div>
@@ -245,54 +263,46 @@
       </section>
     </div>
 
-    <section class="section" aria-labelledby="shots-title">
+    <section class="section" aria-labelledby="ba-title">
       <header class="section__head section__head--split">
-        <p class="kicker">Réalisations</p>
-        <h2 id="shots-title" data-split>Des cheveux qui <em>vous ressemblent</em></h2>
-        <p>Balayages lumineux, coupes nettes, brushings souples&nbsp;: un résultat naturel, facile à porter au quotidien.</p>
+        <p class="kicker">Transformations</p>
+        <h2 id="ba-title" data-split>Des cheveux qui <em>vous ressemblent</em></h2>
+        <p>Balayages lumineux, couleurs, coupes nettes&nbsp;: glissez sur l’image pour voir la transformation.</p>
       </header>
-      <div class="shots">
-        <figure class="shot shot--tall" data-reveal style="--stagger:0" data-parallax>
-          <picture>
-          <source type="image/avif" srcset="assets/img/photos/boucles-480.avif 480w, assets/img/photos/boucles-960.avif 960w, assets/img/photos/boucles-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
-          <img src="assets/img/photos/boucles-960.webp" srcset="assets/img/photos/boucles-480.webp 480w, assets/img/photos/boucles-960.webp 960w, assets/img/photos/boucles-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Cheveux longs blonds et bouclés, vus de dos" width="1440" height="961" loading="lazy" decoding="async">
-        </picture>
-          <figcaption><strong>Balayage lumineux</strong><span>Balayage</span></figcaption>
-        </figure><figure class="shot" data-reveal style="--stagger:1" data-parallax>
-          <picture>
-          <source type="image/avif" srcset="assets/img/photos/coupe-480.avif 480w, assets/img/photos/coupe-960.avif 960w, assets/img/photos/coupe-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
-          <img src="assets/img/photos/coupe-960.webp" srcset="assets/img/photos/coupe-480.webp 480w, assets/img/photos/coupe-960.webp 960w, assets/img/photos/coupe-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Coupe aux ciseaux sur cheveux bruns lisses" width="1440" height="2160" loading="lazy" decoding="async">
-        </picture>
-          <figcaption><strong>Coupe sur cheveux lisses</strong><span>Coupe</span></figcaption>
-        </figure><figure class="shot" data-reveal style="--stagger:2" data-parallax>
-          <picture>
-          <source type="image/avif" srcset="assets/img/photos/brushing-480.avif 480w, assets/img/photos/brushing-960.avif 960w, assets/img/photos/brushing-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
-          <img src="assets/img/photos/brushing-960.webp" srcset="assets/img/photos/brushing-480.webp 480w, assets/img/photos/brushing-960.webp 960w, assets/img/photos/brushing-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Brushing à la brosse ronde et au séchoir" width="1440" height="2160" loading="lazy" decoding="async">
-        </picture>
-          <figcaption><strong>Brushing</strong><span>Brushing</span></figcaption>
-        </figure><figure class="shot shot--wide" data-reveal style="--stagger:3" data-parallax>
-          <picture>
-          <source type="image/avif" srcset="assets/img/photos/couleur-480.avif 480w, assets/img/photos/couleur-960.avif 960w, assets/img/photos/couleur-1440.avif 1440w" sizes="(min-width: 900px) 50vw, 100vw">
-          <img src="assets/img/photos/couleur-960.webp" srcset="assets/img/photos/couleur-480.webp 480w, assets/img/photos/couleur-960.webp 960w, assets/img/photos/couleur-1440.webp 1440w" sizes="(min-width: 900px) 50vw, 100vw" alt="Cheveux cuivrés mis en boucles au fer" width="1440" height="961" loading="lazy" decoding="async">
-        </picture>
-          <figcaption><strong>Reflets cuivrés</strong><span>Couleur</span></figcaption>
-        </figure><figure class="shot" data-reveal style="--stagger:0" data-parallax>
-          <picture>
-          <source type="image/avif" srcset="assets/img/photos/mise-en-forme-480.avif 480w, assets/img/photos/mise-en-forme-960.avif 960w, assets/img/photos/mise-en-forme-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
-          <img src="assets/img/photos/mise-en-forme-960.webp" srcset="assets/img/photos/mise-en-forme-480.webp 480w, assets/img/photos/mise-en-forme-960.webp 960w, assets/img/photos/mise-en-forme-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Chignon bouclé en cours de réalisation" width="1440" height="961" loading="lazy" decoding="async">
-        </picture>
-          <figcaption><strong>Coiffure attachée</strong><span>Coiffage</span></figcaption>
-        </figure><figure class="shot" data-reveal style="--stagger:1" data-parallax>
-          <picture>
-          <source type="image/avif" srcset="assets/img/photos/soin-480.avif 480w, assets/img/photos/soin-960.avif 960w, assets/img/photos/soin-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
-          <img src="assets/img/photos/soin-960.webp" srcset="assets/img/photos/soin-480.webp 480w, assets/img/photos/soin-960.webp 960w, assets/img/photos/soin-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Shampoing et soin au bac" width="1440" height="2160" loading="lazy" decoding="async">
-        </picture>
-          <figcaption><strong>Soin au bac</strong><span>Soin</span></figcaption>
+      <div class="compares">
+        <figure class="compare" data-compare data-reveal style="--stagger:0">
+          <div class="compare__frame" data-cursor="Glisser" data-liquid>
+            <img class="compare__img" src="assets/img/avant-apres/balayage-lumieres-apres.svg" alt="Après&nbsp;: mèche illuminée par un balayage lumières et subtil" width="800" height="1000" loading="lazy" decoding="async">
+            <img class="compare__img compare__img--before" src="assets/img/avant-apres/balayage-lumieres-avant.svg" alt="Avant&nbsp;: mèche brune unie" width="800" height="1000" loading="lazy" decoding="async">
+            <span class="compare__tag">Avant</span>
+            <span class="compare__tag compare__tag--after">Après</span>
+            <span class="compare__line" aria-hidden="true"></span>
+            <span class="compare__handle" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+            <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="Comparer avant et après&nbsp;: Balayage Lumières &amp; Subtil">
+          </div>
+          <figcaption>
+            <span><strong>Balayage Lumières &amp; Subtil</strong><small>Cheveux longs · 4&nbsp;h&nbsp;30 · dès&nbsp;140&nbsp;€</small></span>
+            <a class="link" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity" data-cursor="Réserver">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+          </figcaption>
+        </figure><figure class="compare" data-compare data-reveal style="--stagger:1">
+          <div class="compare__frame" data-cursor="Glisser" data-liquid>
+            <img class="compare__img" src="assets/img/avant-apres/balayage-eclat-apres.svg" alt="Après&nbsp;: mèche aux nuances lumineuses d’un balayage éclat et intense" width="800" height="1000" loading="lazy" decoding="async">
+            <img class="compare__img compare__img--before" src="assets/img/avant-apres/balayage-eclat-avant.svg" alt="Avant&nbsp;: mèche brune aux longueurs ternes" width="800" height="1000" loading="lazy" decoding="async">
+            <span class="compare__tag">Avant</span>
+            <span class="compare__tag compare__tag--after">Après</span>
+            <span class="compare__line" aria-hidden="true"></span>
+            <span class="compare__handle" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+            <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="Comparer avant et après&nbsp;: Balayage Éclat &amp; Intense">
+          </div>
+          <figcaption>
+            <span><strong>Balayage Éclat &amp; Intense</strong><small>Mi-longs à longs · 5&nbsp;h&nbsp;30 · dès&nbsp;160&nbsp;€</small></span>
+            <a class="link" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity" data-cursor="Réserver">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+          </figcaption>
         </figure>
       </div>
       <div class="section__foot">
-        <a class="link" href="realisations/">Voir les réalisations <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-        <p class="note">Photos d’illustration, en attendant les photos du salon.</p>
+        <a class="link" href="realisations/">Voir toutes les réalisations <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+        <p class="note">Illustrations, en attendant les photos avant / après du salon.</p>
       </div>
     </section>
 
@@ -391,7 +401,7 @@
               <li data-reveal style="--stagger:2"><strong>C’est confirmé</strong><span>Confirmation immédiate, à retrouver dans votre compte Planity</span></li>
             </ol>
             <a class="quiz-teaser" href="conseil-coupe/" data-reveal data-cursor="Le test">
-              <svg viewBox="0 0 200 210" role="img" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="0 0 200 210" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
 <defs><linearGradient id="teaser-hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stop-color="#D9B58E" stop-opacity="0"/><stop offset="1" stop-color="#D9B58E"/></linearGradient>
 <linearGradient id="teaser-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B3B28"/><stop offset="1" stop-color="#5B3B28" stop-opacity="0.15"/></linearGradient></defs>
 <path d="M63 96 C58 52 80 42 100 42 C120 42 142 52 137 96 Q149 137 146 178 Q100 183 54 178 Q60 137 63 96Z" fill="#5B3B28"/>
@@ -415,31 +425,41 @@
       </header>
       <div class="visit">
         <div data-reveal>
-          <div class="plan" data-plan data-embed="https://www.google.com/maps?q=Un%20Brun%20d'Hair%2C%204%20bis%20rue%20Champvoisin%2C%2063170%20Aubi%C3%A8re&amp;output=embed">
-          <img src="assets/img/plan-quartier.svg" alt="" width="800" height="560" loading="lazy" decoding="async">
-          <svg class="plan__overlay" viewBox="0 0 800 560" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="plan-desc">
-            <desc id="plan-desc">Plan du quartier&nbsp;: le salon au 4 bis rue Champvoisin, à Aubière, avec l’arrêt de bus, le stationnement et les arceaux à vélos les plus proches.</desc>
+          <div class="plan" data-plan data-embed="https://www.google.com/maps?q=Un%20Brun%20d'Hair%2C%204%20bis%20rue%20Champvoisin%2C%2063170%20Aubi%C3%A8re&amp;output=embed" data-cursor="Explorer">
+          <svg class="plan__overlay" viewBox="133 93 534 374" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="plan-desc">
+            <desc id="plan-desc">Plan du quartier&nbsp;: le salon au 4 bis rue Champvoisin, à Aubière. L’arrêt de bus, le stationnement et les arceaux à vélos sont à une ou deux minutes à pied.</desc>
+            <image class="plan__base" data-href="assets/img/plan-quartier.svg" x="0" y="0" width="800" height="560" preserveAspectRatio="none"/>
             <g class="plan__main"><path d="M422 -29 L423 -30 L423 -32 L424 -34 L423 -36 L422 -37 L421 -39 L419 -39 L417 -40 L415 -39 L414 -38 L412 -37 L412 -35 L411 -33 L412 -31 L413 -30 L414 -28 L416 -27 L418 -27 L420 -28 L422 -29" pathLength="1"/><path d="M432 -15 L454 16 L471 42 L486 63" pathLength="1"/><path d="M387 280 L396 273 L413 260 L417 257" pathLength="1"/><path d="M351 296 L351 298 L352 299 L353 301 L355 302 L357 303 L359 303 L362 302 L364 301" pathLength="1"/><path d="M167 429 L166 432 L167 435 L168 437 L170 439 L172 440 L175 441 L175 441 L178 441 L180 439 L182 438 L184 433 L184 431 L183 428 L182 426 L180 424 L177 423 L175 423 L172 424 L170 425 L168 427 L167 429" pathLength="1"/><path d="M184 431 L189 422 L196 412 L199 406" pathLength="1"/><path d="M878 347 L868 352 L856 358 L847 362 L843 365 L835 372 L830 377 L818 390 L808 401 L797 411 L787 419 L778 425 L768 429 L758 431" pathLength="1"/><path d="M262 626 L258 620" pathLength="1"/><path d="M253 612 L247 604 L230 577 L221 563 L207 522 L205 519 L187 467" pathLength="1"/><path d="M585 162 L596 158 L608 153 L619 146 L625 142 L629 139 L652 119 L678 94 L687 86 L703 72 L711 65 L715 62 L720 58 L740 40 L741 40 L746 36 L748 34 L756 29 L801 1" pathLength="1"/><path d="M836 -23 L900 -64 L905 -68 L909 -71 L913 -74" pathLength="1"/><path d="M157 459 L155 463 L152 467 L149 472 L138 488" pathLength="1"/><path d="M598 537 L592 539 L589 543 L589 551" pathLength="1"/><path d="M666 479 L659 483 L639 497 L636 505" pathLength="1"/><path d="M583 562 L579 569 L575 574 L557 589 L527 616 L520 622 L517 625 L494 646 L484 654 L476 662" pathLength="1"/><path d="M357 288 L350 284 L342 280" pathLength="1"/><path d="M342 280 L346 287 L348 291 L351 296" pathLength="1"/><path d="M340 320 L352 310 L354 306 L357 303" pathLength="1"/><path d="M168 437 L163 447 L157 459" pathLength="1"/><path d="M288 362 L299 354 L329 329" pathLength="1"/><path d="M352 299 L348 307 L340 320" pathLength="1"/><path d="M157 459 L162 455 L167 449 L171 445 L175 441" pathLength="1"/><path d="M288 362 L267 370 L255 378 L244 385" pathLength="1"/><path d="M366 298 L374 291 L387 280" pathLength="1"/><path d="M387 280 L371 286 L367 288 L362 289" pathLength="1"/><path d="M397 -49 L401 -46 L409 -38 L412 -35" pathLength="1"/><path d="M420 -28 L423 -25 L425 -22 L432 -15" pathLength="1"/><path d="M175 441 L179 449 L182 455 L187 467" pathLength="1"/><path d="M187 467 L184 447 L183 442 L182 438" pathLength="1"/><path d="M549 154 L545 163 L543 168" pathLength="1"/><path d="M98 89 L133 103 L150 110 L168 121" pathLength="1"/><path d="M138 488 L113 515 L87 538 L71 550 L63 556 L55 560 L-30 610 L-68 631 L-86 642" pathLength="1"/><path d="M329 329 L340 320" pathLength="1"/><path d="M417 257 L442 238 L461 223 L464 221 L489 202 L500 194 L512 187 L528 180" pathLength="1"/><path d="M486 63 L494 74" pathLength="1"/><path d="M500 84 L526 121 L541 143 L549 154" pathLength="1"/><path d="M199 406 L207 400 L230 391 L235 389 L244 385" pathLength="1"/><path d="M244 385 L252 385 L258 381 L266 377 L288 362" pathLength="1"/><path d="M199 406 L192 408 L185 417 L181 420 L177 423" pathLength="1"/><path d="M494 74 L500 84" pathLength="1"/><path d="M287 226 L295 234 L342 280" pathLength="1"/><path d="M202 146 L206 154 L217 164 L223 167" pathLength="1"/><path d="M258 620 L253 612" pathLength="1"/><path d="M260 -148 L264 -135 L266 -130 L269 -126 L276 -116 L284 -108 L294 -101 L307 -94 L316 -90 L324 -86 L348 -75 L352 -73 L378 -60 L391 -53 L397 -49" pathLength="1"/><path d="M758 431 L747 432 L740 432 L729 434 L720 436 L711 440 L706 443 L696 450 L680 466" pathLength="1"/><path d="M540 175 L553 172 L557 170" pathLength="1"/><path d="M528 180 L540 175" pathLength="1"/><path d="M549 154 L554 162 L555 165" pathLength="1"/><path d="M26 -14 L25 -3 L26 8 L29 12" pathLength="1"/><path d="M31 38 L29 43 L31 48 L35 58 L40 59" pathLength="1"/><path d="M589 551 L594 547 L595 544 L597 541 L598 537" pathLength="1"/><path d="M644 501 L661 486" pathLength="1"/><path d="M636 505 L618 520" pathLength="1"/><path d="M680 466 L673 473 L666 479" pathLength="1"/><path d="M801 1 L807 -4 L836 -23" pathLength="1"/><path d="M557 170 L566 168 L585 162" pathLength="1"/><path d="M357 288 L354 290 L352 292 L351 296" pathLength="1"/><path d="M362 289 L361 288 L359 288 L357 288" pathLength="1"/><path d="M366 298 L366 295 L365 291 L362 289" pathLength="1"/><path d="M223 167 L222 159 L210 148 L202 146" pathLength="1"/><path d="M223 167 L234 177 L265 206 L274 215 L278 218 L287 226" pathLength="1"/><path d="M168 121 L186 133 L202 146" pathLength="1"/><path d="M80 83 L78 79 L64 74 L57 74" pathLength="1"/><path d="M80 83 L98 89" pathLength="1"/><path d="M57 74 L61 79 L76 85 L80 83" pathLength="1"/><path d="M40 59 L48 68 L57 74" pathLength="1"/><path d="M30 31 L31 38" pathLength="1"/><path d="M29 12 L29 18" pathLength="1"/><path d="M29 18 L30 31" pathLength="1"/><path d="M29 12 L31 8 L31 -3 L26 -14" pathLength="1"/><path d="M40 59 L41 55 L38 51 L36 46 L35 42 L31 38" pathLength="1"/><path d="M12 -64 L21 -39 L24 -27 L26 -14" pathLength="1"/><path d="M543 168 L540 175" pathLength="1"/><path d="M555 165 L557 170" pathLength="1"/><path d="M589 551 L583 562" pathLength="1"/><path d="M608 527 L598 537" pathLength="1"/><path d="M636 505 L644 501" pathLength="1"/><path d="M364 301 L366 298" pathLength="1"/><path d="M618 520 L608 527" pathLength="1"/><path d="M661 486 L666 479" pathLength="1"/></g>
-            <defs><path id="plan-street-0" d="M500 84 L526 121 L541 143 L549 154"/><path id="plan-street-1" d="M417 257 L442 238 L461 223 L464 221 L489 202 L500 194 L512 187 L528 180"/><path id="plan-street-2" d="M-86 642 L-68 631 L-30 610 L55 560 L63 556 L71 550 L87 538 L113 515 L138 488"/><path id="plan-street-3" d="M223 167 L234 177 L265 206 L274 215 L278 218 L287 226"/></defs>
-            <text class="plan__label" style="--delay:1.40s"><textPath href="#plan-street-0" startOffset="50%" text-anchor="middle">Rue Pasteur</textPath></text><text class="plan__label" style="--delay:1.55s"><textPath href="#plan-street-1" startOffset="50%" text-anchor="middle">Rue Champvoisin</textPath></text><text class="plan__label" style="--delay:1.70s"><textPath href="#plan-street-2" startOffset="50%" text-anchor="middle">Avenue du Mont-Mouchet</textPath></text><text class="plan__label" style="--delay:1.85s"><textPath href="#plan-street-3" startOffset="50%" text-anchor="middle">Avenue Jean Noëllet</textPath></text>
-            <g class="plan__poi" style="--delay:1.1s">
-              <circle cx="330" cy="262" r="13"/>
-              <use href="#i-parking" x="322" y="254" width="16" height="16"/>
-              <text x="330" y="290" text-anchor="middle">Parking</text>
-            </g><g class="plan__poi" style="--delay:1.3s">
-              <circle cx="355" cy="183" r="13"/>
-              <use href="#i-bike" x="347" y="175" width="16" height="16"/>
-              <text x="355" y="211" text-anchor="middle">Vélos</text>
-            </g><g class="plan__poi" style="--delay:1.5s">
-              <circle cx="457" cy="218" r="13"/>
-              <use href="#i-bus" x="449" y="210" width="16" height="16"/>
-              <text x="457" y="246" text-anchor="middle">Bus E1</text>
-            </g>
-            <g class="plan__salon" style="--delay:.7s">
-              <circle class="halo" cx="400" cy="280" r="26"/>
-              <path class="pin" d="M400 282 c-9 -11 -15 -18 -15 -26 a15 15 0 0 1 30 0 c0 8 -6 15 -15 26z"/>
-              <circle class="dot" cx="400" cy="256" r="5.5"/>
-              <text x="422" y="250">Un Brun d’Hair</text>
+            <g class="plan__layer">
+              <defs><path id="plan-street-0" d="M500 84 L526 121 L541 143 L549 154"/><path id="plan-street-1" d="M417 257 L442 238 L461 223 L464 221 L489 202 L500 194 L512 187 L528 180"/><path id="plan-street-2" d="M-86 642 L-68 631 L-30 610 L55 560 L63 556 L71 550 L87 538 L113 515 L138 488"/><path id="plan-street-3" d="M223 167 L234 177 L265 206 L274 215 L278 218 L287 226"/></defs>
+              <text class="plan__label" style="--delay:1.40s"><textPath href="#plan-street-0" startOffset="50%" text-anchor="middle">Rue Pasteur</textPath></text><text class="plan__label" style="--delay:1.55s"><textPath href="#plan-street-1" startOffset="50%" text-anchor="middle">Rue Champvoisin</textPath></text><text class="plan__label" style="--delay:1.70s"><textPath href="#plan-street-2" startOffset="50%" text-anchor="middle">Avenue du Mont-Mouchet</textPath></text><text class="plan__label" style="--delay:1.85s"><textPath href="#plan-street-3" startOffset="50%" text-anchor="middle">Avenue Jean Noëllet</textPath></text>
+              <mask id="plan-walk-0"><path class="plan__route-mask" d="M330 262 Q361 289 400 276" pathLength="1" style="--delay:1.5s"/></mask>
+              <path class="plan__route" d="M330 262 Q361 289 400 276" mask="url(#plan-walk-0)"/><mask id="plan-walk-1"><path class="plan__route-mask" d="M457 218 Q413 235 400 276" pathLength="1" style="--delay:1.9s"/></mask>
+              <path class="plan__route" d="M457 218 Q413 235 400 276" mask="url(#plan-walk-1)"/>
+              <g class="plan__poi" style="--delay:1.1s">
+                <title>Parking&nbsp;: à environ 72 m du salon</title>
+                <circle cx="330" cy="262" r="9"/>
+                <use href="#i-parking" x="324.5" y="256.5" width="11" height="11"/>
+                <text x="330" y="281" text-anchor="middle">Parking · 1 min</text>
+              </g><g class="plan__poi" style="--delay:1.3s">
+                <title>Vélos&nbsp;: à environ 107 m du salon</title>
+                <circle cx="355" cy="183" r="9"/>
+                <use href="#i-bike" x="349.5" y="177.5" width="11" height="11"/>
+                <text x="355" y="202" text-anchor="middle">Vélos · 1 min</text>
+              </g><g class="plan__poi" style="--delay:1.5s">
+                <title>Bus E1&nbsp;: à environ 84 m du salon</title>
+                <circle cx="457" cy="218" r="9"/>
+                <use href="#i-bus" x="451.5" y="212.5" width="11" height="11"/>
+                <text x="457" y="237" text-anchor="middle">Bus E1 · 1 min</text>
+              </g>
+              <g class="plan__salon" style="--delay:.7s">
+                <circle class="halo" cx="400" cy="280" r="18"/>
+                <path class="pin" d="M400 282 c-6 -7.5 -10 -12 -10 -17.5 a10 10 0 0 1 20 0 c0 5.5 -4 10 -10 17.5z"/>
+                <text class="pin__mark" x="400" y="269" text-anchor="middle">B</text>
+                <text x="400" y="302" text-anchor="middle">Un Brun d’Hair</text>
+              </g>
+              <g class="plan__north" transform="translate(633 123)"><path d="M0 -10 L4.5 4.5 L0 1.5 L-4.5 4.5Z"/><text y="16" text-anchor="middle">N</text></g>
+              <g class="plan__scale" transform="translate(533 159)"><line x1="0" y1="0" x2="100" y2="0"/><line x1="0" y1="-3" x2="0" y2="3"/><line x1="100" y1="-3" x2="100" y2="3"/><text x="50" y="-6" text-anchor="middle">100 m</text></g>
             </g>
           </svg>
           <div class="plan__bar">
@@ -498,7 +518,7 @@
         <div>
           <h2>Le salon</h2>
           <address>4 bis rue Champvoisin<br>63170 Aubière</address>
-          <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+          <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
           <ul style="margin-top:1rem">
             <li><a href="tel:+33444448287" data-track="phone">04&nbsp;44&nbsp;44&nbsp;82&nbsp;87</a></li>
             

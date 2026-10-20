@@ -4,7 +4,7 @@ import { reviewsFor } from '../data/reviews.mjs';
 import { serviceSchema } from './layout.mjs';
 import { icon } from './icons.mjs';
 import {
-  pageHero, kicker, priceCategory, shots, SHOTS, quotes, faq, faqSchema, cta, related, productMini, bookButton, phoneLink,
+  pageHero, kicker, priceCategory, shots, SHOTS, beforeAfter, quotes, faq, faqSchema, cta, related, productMini, bookButton, phoneLink,
 } from './blocks.mjs';
 
 export function servicePage(ctx, page) {
@@ -64,6 +64,8 @@ export function servicePage(ctx, page) {
         ${page.categories.map((id) => priceCategory(ctx, id))}
       </div>
     </section>
+
+    ${page.compares ? beforeAfter(ctx, page.compares) : ''}
 
     ${pictures.length ? html`<section class="section" aria-labelledby="pictures-title">
       <header class="section__head">

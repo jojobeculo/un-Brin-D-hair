@@ -4,7 +4,7 @@ import { salon } from '../data/salon.mjs';
 import { category, allServices } from '../data/services.mjs';
 import { bottleDefs } from '../../assets/js/lib/bottle.js';
 import { icon, sprite } from './icons.mjs';
-import { external, whatsappUrl, PAGES } from './blocks.mjs';
+import { external, whatsappUrl, PAGES, hoursTable } from './blocks.mjs';
 
 const NAV = [
   { route: 'qui-suis-je/', label: 'Qui suis-je ?' },
@@ -106,6 +106,24 @@ function breadcrumb(ctx, trail) {
     </nav>`;
 }
 
+// Statut d’ouverture cliquable : ouvre le planning de la semaine (fenêtre #horaires, API Popover).
+const statusButton = () => html`<button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden"> : voir les horaires de la semaine</span></button>`;
+
+function hoursPopover(ctx) {
+  return html`<div id="horaires" class="hours-pop" popover aria-labelledby="horaires-title">
+    <div class="hours-pop__head">
+      <p id="horaires-title" class="hours-pop__title">Horaires <em>du salon</em></p>
+      <button class="hours-pop__close" type="button" popovertarget="horaires" popovertargetaction="hide">${icon('close')}<span class="visually-hidden">Fermer les horaires</span></button>
+    </div>
+    <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+    ${hoursTable()}
+    <div class="actions">
+      <a class="btn btn--primary btn--sm" href="${salon.links.planity}"${external} data-track="planity">Je réserve ${icon('arrow-up-right')}</a>
+      <a class="btn btn--sm" href="${ctx.rel('contact/')}#acces">Plan et accès</a>
+    </div>
+  </div>`;
+}
+
 const logo = (ctx) => html`<a class="logo" href="${ctx.rel('')}" aria-label="Un Brun d’Hair, accueil">Un Brun <em>d’Hair</em></a>`;
 
 function header(ctx) {
@@ -127,7 +145,7 @@ function header(ctx) {
         </ul>
       </nav>
       <div class="header__end">
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        ${statusButton()}
         <a class="cart-link" href="${ctx.rel('boutique/')}#panier" data-cart-link hidden>
           ${icon('bag')}<span class="cart-link__count" data-cart-count>0</span><span class="visually-hidden">article(s) dans le panier</span>
         </a>
@@ -156,7 +174,7 @@ function menu(ctx) {
       </ul>
       <div class="menu__foot">
         <a class="btn btn--primary btn--block" href="${salon.links.planity}"${external} data-track="planity">Je réserve sur Planity</a>
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        ${statusButton()}
         <p>${salon.address.street}, ${salon.address.postalCode} ${salon.address.city}<br><a href="tel:${salon.phone.tel}" data-track="phone">${salon.phone.display}</a></p>
       </div>
     </div>
@@ -186,7 +204,7 @@ function footer(ctx) {
         <div>
           <h2>Le salon</h2>
           <address>${salon.address.street}<br>${salon.address.postalCode} ${salon.address.city}</address>
-          <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+          ${statusButton()}
           <ul style="margin-top:1rem">
             <li><a href="tel:${salon.phone.tel}" data-track="phone">${salon.phone.display}</a></li>
             ${whatsapp ? html`<li><a href="${whatsapp}"${external} data-track="whatsapp">WhatsApp</a></li>` : ''}
@@ -282,6 +300,7 @@ export function layout(page, ctx) {
   <a class="skip-link" href="#contenu">Aller au contenu</a>
   ${header(ctx)}
   ${menu(ctx)}
+  ${hoursPopover(ctx)}
 
   <main id="contenu">
     ${trail ? breadcrumb(ctx, trail) : ''}

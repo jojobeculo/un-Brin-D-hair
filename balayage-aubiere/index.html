@@ -48,7 +48,7 @@
         </ul>
       </nav>
       <div class="header__end">
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
         <a class="cart-link" href="../boutique/#panier" data-cart-link hidden>
           <svg class="icon" aria-hidden="true"><use href="#i-bag"/></svg><span class="cart-link__count" data-cart-count>0</span><span class="visually-hidden">article(s) dans le panier</span>
         </a>
@@ -73,11 +73,29 @@
       </ul>
       <div class="menu__foot">
         <a class="btn btn--primary btn--block" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity">Je réserve sur Planity</a>
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
         <p>4 bis rue Champvoisin, 63170 Aubière<br><a href="tel:+33444448287" data-track="phone">04&nbsp;44&nbsp;44&nbsp;82&nbsp;87</a></p>
       </div>
     </div>
   </dialog>
+  <div id="horaires" class="hours-pop" popover aria-labelledby="horaires-title">
+    <div class="hours-pop__head">
+      <p id="horaires-title" class="hours-pop__title">Horaires <em>du salon</em></p>
+      <button class="hours-pop__close" type="button" popovertarget="horaires" popovertargetaction="hide"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg><span class="visually-hidden">Fermer les horaires</span></button>
+    </div>
+    <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+    <table class="hours" data-hours>
+            <caption class="visually-hidden">Horaires d’ouverture</caption>
+            <tbody>
+              <tr data-day="1"><th scope="row">Lundi</th><td>10&nbsp;h – 18&nbsp;h<sup>*</sup></td></tr><tr data-day="2"><th scope="row">Mardi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="3"><th scope="row">Mercredi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="4"><th scope="row">Jeudi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="5"><th scope="row">Vendredi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="6"><th scope="row">Samedi</th><td>9&nbsp;h – 16&nbsp;h<sup>*</sup></td></tr><tr data-day="0"><th scope="row">Dimanche</th><td>Fermé</td></tr>
+            </tbody>
+          </table>
+          <p class="small"><sup>*</sup> Une semaine sur deux. <span data-alt-week></span> Les créneaux exacts sont sur Planity.</p>
+    <div class="actions">
+      <a class="btn btn--primary btn--sm" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+      <a class="btn btn--sm" href="../contact/#acces">Plan et accès</a>
+    </div>
+  </div>
 
   <main id="contenu">
     <nav class="breadcrumb" aria-label="Fil d’Ariane">
@@ -234,25 +252,68 @@
       </div>
     </section>
 
+    <section class="section" aria-labelledby="ba-title">
+      <header class="section__head section__head--split">
+        <p class="kicker">Transformations</p>
+        <h2 id="ba-title" data-split>Avant <em>/ après</em></h2>
+        <p>Glissez sur l’image pour comparer. Des transformations pensées pour chaque chevelure, jamais en série.</p>
+      </header>
+      <div class="compares">
+        <figure class="compare" data-compare data-reveal style="--stagger:0">
+          <div class="compare__frame" data-cursor="Glisser" data-liquid>
+            <img class="compare__img" src="../assets/img/avant-apres/balayage-lumieres-apres.svg" alt="Après&nbsp;: mèche illuminée par un balayage lumières et subtil" width="800" height="1000" loading="lazy" decoding="async">
+            <img class="compare__img compare__img--before" src="../assets/img/avant-apres/balayage-lumieres-avant.svg" alt="Avant&nbsp;: mèche brune unie" width="800" height="1000" loading="lazy" decoding="async">
+            <span class="compare__tag">Avant</span>
+            <span class="compare__tag compare__tag--after">Après</span>
+            <span class="compare__line" aria-hidden="true"></span>
+            <span class="compare__handle" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+            <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="Comparer avant et après&nbsp;: Balayage Lumières &amp; Subtil">
+          </div>
+          <figcaption>
+            <span><strong>Balayage Lumières &amp; Subtil</strong><small>Cheveux longs · 4&nbsp;h&nbsp;30 · dès&nbsp;140&nbsp;€</small></span>
+            <a class="link" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity" data-cursor="Réserver">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+          </figcaption>
+        </figure><figure class="compare" data-compare data-reveal style="--stagger:1">
+          <div class="compare__frame" data-cursor="Glisser" data-liquid>
+            <img class="compare__img" src="../assets/img/avant-apres/balayage-eclat-apres.svg" alt="Après&nbsp;: mèche aux nuances lumineuses d’un balayage éclat et intense" width="800" height="1000" loading="lazy" decoding="async">
+            <img class="compare__img compare__img--before" src="../assets/img/avant-apres/balayage-eclat-avant.svg" alt="Avant&nbsp;: mèche brune aux longueurs ternes" width="800" height="1000" loading="lazy" decoding="async">
+            <span class="compare__tag">Avant</span>
+            <span class="compare__tag compare__tag--after">Après</span>
+            <span class="compare__line" aria-hidden="true"></span>
+            <span class="compare__handle" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+            <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="Comparer avant et après&nbsp;: Balayage Éclat &amp; Intense">
+          </div>
+          <figcaption>
+            <span><strong>Balayage Éclat &amp; Intense</strong><small>Mi-longs à longs · 5&nbsp;h&nbsp;30 · dès&nbsp;160&nbsp;€</small></span>
+            <a class="link" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity" data-cursor="Réserver">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="section__foot">
+        
+        <p class="note">Illustrations, en attendant les photos avant / après du salon.</p>
+      </div>
+    </section>
+
     <section class="section" aria-labelledby="pictures-title">
       <header class="section__head">
         <p class="kicker">En images</p>
         <h2 id="pictures-title" data-split>Le <em>résultat</em></h2>
       </header>
       <div class="shots">
-        <figure class="shot shot--tall" data-reveal style="--stagger:0" data-parallax>
+        <figure class="shot shot--tall" data-reveal style="--stagger:0" data-parallax data-liquid data-cursor="Voir">
           <picture>
           <source type="image/avif" srcset="../assets/img/photos/boucles-480.avif 480w, ../assets/img/photos/boucles-960.avif 960w, ../assets/img/photos/boucles-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
           <img src="../assets/img/photos/boucles-960.webp" srcset="../assets/img/photos/boucles-480.webp 480w, ../assets/img/photos/boucles-960.webp 960w, ../assets/img/photos/boucles-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Cheveux longs blonds et bouclés, vus de dos" width="1440" height="961" loading="lazy" decoding="async">
         </picture>
           <figcaption><strong>Balayage lumineux</strong><span>Balayage</span></figcaption>
-        </figure><figure class="shot shot--wide" data-reveal style="--stagger:1" data-parallax>
+        </figure><figure class="shot shot--wide" data-reveal style="--stagger:1" data-parallax data-liquid data-cursor="Voir">
           <picture>
           <source type="image/avif" srcset="../assets/img/photos/couleur-480.avif 480w, ../assets/img/photos/couleur-960.avif 960w, ../assets/img/photos/couleur-1440.avif 1440w" sizes="(min-width: 900px) 50vw, 100vw">
           <img src="../assets/img/photos/couleur-960.webp" srcset="../assets/img/photos/couleur-480.webp 480w, ../assets/img/photos/couleur-960.webp 960w, ../assets/img/photos/couleur-1440.webp 1440w" sizes="(min-width: 900px) 50vw, 100vw" alt="Cheveux cuivrés mis en boucles au fer" width="1440" height="961" loading="lazy" decoding="async">
         </picture>
           <figcaption><strong>Reflets cuivrés</strong><span>Couleur</span></figcaption>
-        </figure><figure class="shot" data-reveal style="--stagger:2" data-parallax>
+        </figure><figure class="shot" data-reveal style="--stagger:2" data-parallax data-liquid data-cursor="Voir">
           <picture>
           <source type="image/avif" srcset="../assets/img/photos/brushing-480.avif 480w, ../assets/img/photos/brushing-960.avif 960w, ../assets/img/photos/brushing-1440.avif 1440w" sizes="(min-width: 900px) 25vw, 50vw">
           <img src="../assets/img/photos/brushing-960.webp" srcset="../assets/img/photos/brushing-480.webp 480w, ../assets/img/photos/brushing-960.webp 960w, ../assets/img/photos/brushing-1440.webp 1440w" sizes="(min-width: 900px) 25vw, 50vw" alt="Brushing à la brosse ronde et au séchoir" width="1440" height="2160" loading="lazy" decoding="async">
@@ -381,7 +442,7 @@
         <div>
           <h2>Le salon</h2>
           <address>4 bis rue Champvoisin<br>63170 Aubière</address>
-          <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+          <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
           <ul style="margin-top:1rem">
             <li><a href="tel:+33444448287" data-track="phone">04&nbsp;44&nbsp;44&nbsp;82&nbsp;87</a></li>
             

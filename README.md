@@ -29,7 +29,7 @@ Sur chaque page :
 - Bouton **« Je réserve »** toujours visible : dans l’en-tête sur ordinateur, dans la barre
   du bas sur téléphone (avec **Appeler** et **WhatsApp** ou **Itinéraire**).
 - **Statut d’ouverture en direct** (« Ouvert · jusqu’à 19 h »), qui tient compte du lundi et
-  du samedi ouverts une semaine sur deux.
+  du samedi ouverts une semaine sur deux. Un clic sur le statut ouvre le planning de la semaine.
 - **Données structurées** Schema.org : salon (`HairSalon`), prestations et tarifs (`Service`),
   questions fréquentes (`FAQPage`), fil d’Ariane (`BreadcrumbList`). Pas de note agrégée :
   Google l’interdit pour les avis que l’établissement affiche lui-même.
@@ -43,7 +43,8 @@ Sur chaque page :
 | Phrase qui s’éclaire mot à mot au défilement | Accueil | `reveal.js` |
 | Fond qui passe du lin à l’expresso | Réservation, questionnaire, boutique, bandeaux finaux | `assets/js/modules/ambient.js` |
 | Ruban organique, orbes de lumière, parallaxe | Accueil, Qui suis-je, questionnaire, réservation | `ambient.js`, `motion.js`, `fx.js` |
-| Plan du quartier qui se dessine | Accueil, Contact | `assets/js/modules/plan.js` |
+| Plan du quartier qui se dessine, trajets à pied animés | Accueil, Contact | `assets/js/modules/plan.js` |
+| Avant / après à glisser (aller-retour de démonstration à l’apparition) | Accueil, Réalisations, Coupe femme, Coloration, Balayage | `assets/js/modules/compare.js` |
 | Onde au clic sur les boutons | Toutes les pages | `motion.js` |
 | Curseur, traînée dorée, boutons magnétiques, cartes inclinées, reflet liquide sur les photos | Ordinateur uniquement | `assets/js/modules/fx.js` |
 
@@ -95,6 +96,11 @@ python3 tools/photos.py ma-photo.jpg coupe
 Le script crée les versions AVIF et WebP (480, 960 et 1440 px) et le fichier `coupe.json`.
 Gardez le même nom pour remplacer une photo existante. Il faut Python 3 et Pillow avec AVIF.
 Les légendes sont dans `SHOTS` et `SERVICES` de `src/components/blocks.mjs`.
+
+Les avant / après de `assets/img/avant-apres/` sont des illustrations (mèches dessinées).
+Remplacez-les par des photos au format portrait 4:5 (par exemple 1200 × 1500 px), en gardant
+les mêmes noms, ou changez la liste `GALLERY` de `src/components/blocks.mjs`. Les deux photos
+d’une paire doivent avoir le même cadrage.
 
 ### Instagram
 
@@ -193,7 +199,7 @@ assets/js/main.js          point d’entrée
 assets/js/lib/             horaires, questionnaire, dessins (coupes, flacons, ruban), panier, envoi
 assets/js/modules/         une fonctionnalité par fichier
 assets/fonts/              Instrument Serif et Instrument Sans + licence OFL
-assets/img/                photos, plan du quartier, image de partage, icône
+assets/img/                photos, avant / après, plan du quartier, image de partage, icône
 stripe/                    fonction de paiement (Cloudflare Workers)
 tools/                     photos, plan, Instagram
 tests/                     tests (node --test)

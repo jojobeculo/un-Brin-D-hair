@@ -48,7 +48,7 @@
         </ul>
       </nav>
       <div class="header__end">
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
         <a class="cart-link" href="/un-Brin-D-hair/boutique/#panier" data-cart-link hidden>
           <svg class="icon" aria-hidden="true"><use href="#i-bag"/></svg><span class="cart-link__count" data-cart-count>0</span><span class="visually-hidden">article(s) dans le panier</span>
         </a>
@@ -73,11 +73,29 @@
       </ul>
       <div class="menu__foot">
         <a class="btn btn--primary btn--block" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity">Je réserve sur Planity</a>
-        <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+        <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
         <p>4 bis rue Champvoisin, 63170 Aubière<br><a href="tel:+33444448287" data-track="phone">04&nbsp;44&nbsp;44&nbsp;82&nbsp;87</a></p>
       </div>
     </div>
   </dialog>
+  <div id="horaires" class="hours-pop" popover aria-labelledby="horaires-title">
+    <div class="hours-pop__head">
+      <p id="horaires-title" class="hours-pop__title">Horaires <em>du salon</em></p>
+      <button class="hours-pop__close" type="button" popovertarget="horaires" popovertargetaction="hide"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg><span class="visually-hidden">Fermer les horaires</span></button>
+    </div>
+    <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+    <table class="hours" data-hours>
+            <caption class="visually-hidden">Horaires d’ouverture</caption>
+            <tbody>
+              <tr data-day="1"><th scope="row">Lundi</th><td>10&nbsp;h – 18&nbsp;h<sup>*</sup></td></tr><tr data-day="2"><th scope="row">Mardi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="3"><th scope="row">Mercredi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="4"><th scope="row">Jeudi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="5"><th scope="row">Vendredi</th><td>9&nbsp;h – 19&nbsp;h</td></tr><tr data-day="6"><th scope="row">Samedi</th><td>9&nbsp;h – 16&nbsp;h<sup>*</sup></td></tr><tr data-day="0"><th scope="row">Dimanche</th><td>Fermé</td></tr>
+            </tbody>
+          </table>
+          <p class="small"><sup>*</sup> Une semaine sur deux. <span data-alt-week></span> Les créneaux exacts sont sur Planity.</p>
+    <div class="actions">
+      <a class="btn btn--primary btn--sm" href="https://www.planity.com/un-brun-dhair-63170-aubiere" target="_blank" rel="noopener" data-track="planity">Je réserve <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+      <a class="btn btn--sm" href="/un-Brin-D-hair/contact/#acces">Plan et accès</a>
+    </div>
+  </div>
 
   <main id="contenu">
     
@@ -105,7 +123,7 @@
         <div>
           <h2>Le salon</h2>
           <address>4 bis rue Champvoisin<br>63170 Aubière</address>
-          <p class="status" data-open-status>Du lundi au samedi, sur rendez-vous</p>
+          <button class="status status--button" type="button" popovertarget="horaires" data-open-status><span class="status__label" data-status-label>Du lundi au samedi, sur rendez-vous</span><span class="status__short" data-status-short aria-hidden="true">Horaires</span><span class="visually-hidden">&nbsp;: voir les horaires de la semaine</span></button>
           <ul style="margin-top:1rem">
             <li><a href="tel:+33444448287" data-track="phone">04&nbsp;44&nbsp;44&nbsp;82&nbsp;87</a></li>
             

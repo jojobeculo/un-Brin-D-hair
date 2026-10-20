@@ -1,6 +1,6 @@
 // Effets réservés à l’ordinateur (souris, écran large, mouvements autorisés) : chargé à la demande par main.js.
 // Curseur, traînée dorée dans l’accueil, ruban organique qui réagit à la souris, orbes de lumière avec inertie,
-// boutons magnétiques, cartes inclinées en 3D et reflet liquide sur les photos.
+// boutons magnétiques, cartes inclinées en 3D, reflet liquide sur les photos et plan en relief.
 // Une seule boucle requestAnimationFrame, arrêtée dès que tout est immobile.
 import { ribbonPaths, RIBBONS } from '../lib/ribbon.js';
 
@@ -325,6 +325,22 @@ function liquid() {
   });
 }
 
+// ---------- Plan du quartier en relief ----------
+
+function planDepth() {
+  document.querySelectorAll('[data-plan]').forEach((plan) => {
+    plan.addEventListener('pointermove', (event) => {
+      const rect = plan.getBoundingClientRect();
+      plan.style.setProperty('--px', `${(((event.clientX - rect.left) / rect.width - 0.5) * 14).toFixed(1)}px`);
+      plan.style.setProperty('--py', `${(((event.clientY - rect.top) / rect.height - 0.5) * 10).toFixed(1)}px`);
+    });
+    plan.addEventListener('pointerleave', () => {
+      plan.style.setProperty('--px', '0px');
+      plan.style.setProperty('--py', '0px');
+    });
+  });
+}
+
 export function initFx() {
   addEventListener('pointermove', (event) => {
     if (event.pointerType !== 'mouse') return;
@@ -334,7 +350,7 @@ export function initFx() {
     wake();
   }, { passive: true });
   addEventListener('scroll', wake, { passive: true });
-  [cursor, trail, ribbons, orbs, magnetic, tilt, liquid].forEach((init) => {
+  [cursor, trail, ribbons, orbs, magnetic, tilt, liquid, planDepth].forEach((init) => {
     try {
       init();
     } catch (error) {

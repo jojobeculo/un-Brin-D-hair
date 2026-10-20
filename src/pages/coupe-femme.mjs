@@ -39,6 +39,7 @@ export default function coupeFemme(ctx) {
       { title: 'Le brushing', text: 'Et les conseils pour le refaire à la maison.' },
     ],
     categories: ['femme', 'soin', 'options'],
+    compares: ['coupe'],
     shots: ['coupe', 'brushing', 'mise-en-forme'],
     reviewsTag: 'femme',
     products: ['oi-shampoo', 'oi-all-in-one-milk', 'volu-hair-mist'],

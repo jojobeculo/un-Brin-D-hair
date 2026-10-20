@@ -40,6 +40,7 @@ export default function balayage(ctx) {
       { title: 'Coupe et brushing', text: 'Inclus, pour repartir avec un résultat fini.' },
     ],
     categories: ['balayage', 'diagnostic', 'options'],
+    compares: ['balayage-lumieres', 'balayage-eclat'],
     shots: ['boucles', 'couleur', 'brushing'],
     reviewsTag: 'balayage',
     products: ['heart-of-glass-shampoo', 'heart-of-glass-conditioner', 'oi-oil'],

@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { html, raw } from '../lib/html.mjs';
 import { salon } from '../data/salon.mjs';
-import { category, startingPrice, priceOf } from '../data/services.mjs';
+import { category, service, startingPrice, priceOf, durationOf } from '../data/services.mjs';
 import { product, lines } from '../data/products.mjs';
 import { formatDuration } from '../../assets/js/lib/format.js';
 import { formatTime } from '../../assets/js/lib/hours.js';
@@ -109,8 +109,8 @@ export function serviceCards(ctx, ids = SERVICES.map((item) => item.id), { headi
           const cat = category(id);
           const href = `${ctx.rel(cat.page)}${cat.anchor ? `#${cat.anchor}` : ''}`;
           return html`<li data-reveal style="--stagger:${index % 3}">
-          <a class="card" href="${href}" data-cursor="Découvrir">
-            <div class="card__media">${photo(ctx, item.image, { alt: item.alt, sizes: '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw' })}</div>
+          <a class="card" href="${href}" data-cursor="Explorer">
+            <div class="card__media" data-liquid>${photo(ctx, item.image, { alt: item.alt, sizes: '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw' })}</div>
             <div class="card__body">
               ${raw(`<${headingTag} class="card__title">${html`${item.title}`}</${headingTag}>`)}
               <p class="card__text">${item.text}</p>
@@ -135,11 +135,57 @@ export const SHOTS = [
 
 export function shots(ctx, items = SHOTS) {
   return html`<div class="shots">
-        ${items.map((item, index) => html`<figure class="${item.layout ? `shot shot--${item.layout}` : 'shot'}" data-reveal style="--stagger:${index % 4}" data-parallax>
+        ${items.map((item, index) => html`<figure class="${item.layout ? `shot shot--${item.layout}` : 'shot'}" data-reveal style="--stagger:${index % 4}" data-parallax data-liquid data-cursor="Voir">
           ${photo(ctx, item.image, { alt: item.alt, sizes: item.layout === 'wide' ? '(min-width: 900px) 50vw, 100vw' : '(min-width: 900px) 25vw, 50vw' })}
           <figcaption><strong>${item.title}</strong><span>${item.tag}</span></figcaption>
         </figure>`)}
       </div>`;
+}
+
+// ---------- Avant / après (illustrations, à remplacer par des photos du salon) ----------
+
+export const GALLERY = [
+  { slug: 'balayage-lumieres', title: 'Balayage Lumières & Subtil', book: 'balayage-lumieres-longs', before: 'Avant : mèche brune unie', after: 'Après : mèche illuminée par un balayage lumières et subtil' },
+  { slug: 'balayage-eclat', title: 'Balayage Éclat & Intense', book: 'balayage-eclat-longs', before: 'Avant : mèche brune aux longueurs ternes', after: 'Après : mèche aux nuances lumineuses d’un balayage éclat et intense' },
+  { slug: 'coupe', title: 'Coupe & brushing', book: 'femme-scb-milongs', before: 'Avant : longueurs irrégulières et pointes abîmées', after: 'Après : coupe nette et brushing lisse' },
+  { slug: 'gloss', title: 'Gloss & brillance', book: 'couleur-scb-longs', before: 'Avant : mèche terne aux reflets cuivrés', after: 'Après : mèche brillante, reflets neutralisés par un gloss' },
+];
+
+function compare(ctx, item, index) {
+  const image = (state) => ctx.asset(`assets/img/avant-apres/${item.slug}-${state}.svg`);
+  return html`<figure class="compare" data-compare data-reveal style="--stagger:${index % 2}">
+          <div class="compare__frame" data-cursor="Glisser" data-liquid>
+            <img class="compare__img" src="${image('apres')}" alt="${item.after}" width="800" height="1000" loading="lazy" decoding="async">
+            <img class="compare__img compare__img--before" src="${image('avant')}" alt="${item.before}" width="800" height="1000" loading="lazy" decoding="async">
+            <span class="compare__tag">Avant</span>
+            <span class="compare__tag compare__tag--after">Après</span>
+            <span class="compare__line" aria-hidden="true"></span>
+            <span class="compare__handle" aria-hidden="true">${icon('arrow-left')}${icon('arrow-right')}</span>
+            <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="${`Comparer avant et après : ${item.title}`}">
+          </div>
+          <figcaption>
+            <span><strong>${item.title}</strong><small>${service(item.book).label} · ${durationOf(item.book)} · ${priceOf(item.book)}</small></span>
+            <a class="link" href="${salon.links.planity}"${external} data-track="planity" data-cursor="Réserver">Je réserve ${icon('arrow-up-right')}</a>
+          </figcaption>
+        </figure>`;
+}
+
+export function beforeAfter(ctx, slugs = GALLERY.map((item) => item.slug), { titleTag = 'h2', title = html`Avant <em>/ après</em>`, intro = 'Glissez sur l’image pour comparer. Des transformations pensées pour chaque chevelure, jamais en série.', more = '' } = {}) {
+  const items = slugs.map((slug) => GALLERY.find((item) => item.slug === slug));
+  return html`<section class="section" aria-labelledby="ba-title">
+      <header class="section__head section__head--split">
+        ${kicker('Transformations')}
+        ${raw(`<${titleTag} id="ba-title" data-split>${html`${title}`}</${titleTag}>`)}
+        <p>${intro}</p>
+      </header>
+      <div class="${items.length === 1 ? 'compares compares--single' : 'compares'}">
+        ${items.map((item, index) => compare(ctx, item, index))}
+      </div>
+      <div class="section__foot">
+        ${more ? html`<a class="link" href="${more}">Voir toutes les réalisations ${icon('arrow-right')}</a>` : ''}
+        <p class="note">Illustrations, en attendant les photos avant / après du salon.</p>
+      </div>
+    </section>`;
 }
 
 // ---------- Avis ----------
@@ -234,7 +280,7 @@ export function hoursSentence() {
   return sentence.charAt(0).toUpperCase() + sentence.slice(1);
 }
 
-function hoursTable() {
+export function hoursTable() {
   return html`<table class="hours" data-hours>
             <caption class="visually-hidden">Horaires d’ouverture</caption>
             <tbody>
@@ -248,27 +294,47 @@ function hoursTable() {
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 const POI = { bus: ['bus', 'Bus E1'], parking: ['parking', 'Parking'], velo: ['bike', 'Vélos'] };
 
+// Trajet à pied d’un repère jusqu’au salon : courbe douce, tracée à l’arrivée du plan.
+function walk(poi, cx, cy, index) {
+  const mx = (poi.x + cx) / 2 - (cy - poi.y) * 0.25;
+  const my = (poi.y + cy) / 2 + (cx - poi.x) * 0.25;
+  const d = `M${poi.x} ${poi.y} Q${mx.toFixed(0)} ${my.toFixed(0)} ${cx} ${cy - 4}`;
+  return html`<mask id="plan-walk-${index}"><path class="plan__route-mask" d="${d}" pathLength="1" style="--delay:${(1.5 + index * 0.4).toFixed(1)}s"/></mask>
+              <path class="plan__route" d="${d}" mask="url(#plan-walk-${index})"/>`;
+}
+
+// Le plan est zoomé ×1,5 autour du salon : fenêtre de 534 × 374 m au centre du fond de 800 × 560 m.
+const ZOOM = { x: 133, y: 93, width: 534, height: 374 };
+
 function planMap(ctx) {
   const cx = plan.width / 2;
   const cy = plan.height / 2;
+  const right = ZOOM.x + ZOOM.width;
   const googleEmbed = `https://www.google.com/maps?q=${encodeURIComponent(`Un Brun d'Hair, ${salon.address.street}, ${salon.address.postalCode} ${salon.address.city}`)}&output=embed`;
-  return html`<div class="plan" data-plan data-embed="${googleEmbed}">
-          <img src="${ctx.asset('assets/img/plan-quartier.svg')}" alt="" width="${plan.width}" height="${plan.height}" loading="lazy" decoding="async">
-          <svg class="plan__overlay" viewBox="0 0 ${plan.width} ${plan.height}" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="plan-desc">
-            <desc id="plan-desc">Plan du quartier : le salon au ${salon.address.street}, à Aubière, avec l’arrêt de bus, le stationnement et les arceaux à vélos les plus proches.</desc>
+  const minutes = (poi) => Math.max(1, Math.round(poi.distance / 80));
+  return html`<div class="plan" data-plan data-embed="${googleEmbed}" data-cursor="Explorer">
+          <svg class="plan__overlay" viewBox="${ZOOM.x} ${ZOOM.y} ${ZOOM.width} ${ZOOM.height}" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="plan-desc">
+            <desc id="plan-desc">Plan du quartier : le salon au ${salon.address.street}, à Aubière. L’arrêt de bus, le stationnement et les arceaux à vélos sont à une ou deux minutes à pied.</desc>
+            <image class="plan__base" data-href="${ctx.asset('assets/img/plan-quartier.svg')}" x="0" y="0" width="${plan.width}" height="${plan.height}" preserveAspectRatio="none"/>
             <g class="plan__main">${plan.main.map((d) => html`<path d="${d}" pathLength="1"/>`)}</g>
-            <defs>${plan.labels.map((label, index) => html`<path id="plan-street-${index}" d="${label.d}"/>`)}</defs>
-            ${plan.labels.map((label, index) => html`<text class="plan__label" style="--delay:${(1.4 + index * 0.15).toFixed(2)}s"><textPath href="#plan-street-${index}" startOffset="50%" text-anchor="middle">${label.name}</textPath></text>`)}
-            ${plan.pois.map((poi, index) => html`<g class="plan__poi" style="--delay:${(1.1 + index * 0.2).toFixed(1)}s">
-              <circle cx="${poi.x}" cy="${poi.y}" r="13"/>
-              <use href="#i-${POI[poi.kind][0]}" x="${poi.x - 8}" y="${poi.y - 8}" width="16" height="16"/>
-              <text x="${poi.x}" y="${poi.y + 28}" text-anchor="middle">${POI[poi.kind][1]}</text>
-            </g>`)}
-            <g class="plan__salon" style="--delay:.7s">
-              <circle class="halo" cx="${cx}" cy="${cy}" r="26"/>
-              <path class="pin" d="M${cx} ${cy + 2} c-9 -11 -15 -18 -15 -26 a15 15 0 0 1 30 0 c0 8 -6 15 -15 26z"/>
-              <circle class="dot" cx="${cx}" cy="${cy - 24}" r="5.5"/>
-              <text x="${cx + 22}" y="${cy - 30}">Un Brun d’Hair</text>
+            <g class="plan__layer">
+              <defs>${plan.labels.map((label, index) => html`<path id="plan-street-${index}" d="${label.d}"/>`)}</defs>
+              ${plan.labels.map((label, index) => html`<text class="plan__label" style="--delay:${(1.4 + index * 0.15).toFixed(2)}s"><textPath href="#plan-street-${index}" startOffset="50%" text-anchor="middle">${label.name}</textPath></text>`)}
+              ${plan.pois.filter((poi) => poi.kind !== 'velo').map((poi, index) => walk(poi, cx, cy, index))}
+              ${plan.pois.map((poi, index) => html`<g class="plan__poi" style="--delay:${(1.1 + index * 0.2).toFixed(1)}s">
+                <title>${POI[poi.kind][1]} : à environ ${poi.distance} m du salon</title>
+                <circle cx="${poi.x}" cy="${poi.y}" r="9"/>
+                <use href="#i-${POI[poi.kind][0]}" x="${poi.x - 5.5}" y="${poi.y - 5.5}" width="11" height="11"/>
+                <text x="${poi.x}" y="${poi.y + 19}" text-anchor="middle">${POI[poi.kind][1]} · ${minutes(poi)} min</text>
+              </g>`)}
+              <g class="plan__salon" style="--delay:.7s">
+                <circle class="halo" cx="${cx}" cy="${cy}" r="18"/>
+                <path class="pin" d="M${cx} ${cy + 2} c-6 -7.5 -10 -12 -10 -17.5 a10 10 0 0 1 20 0 c0 5.5 -4 10 -10 17.5z"/>
+                <text class="pin__mark" x="${cx}" y="${cy - 11}" text-anchor="middle">B</text>
+                <text x="${cx}" y="${cy + 22}" text-anchor="middle">Un Brun d’Hair</text>
+              </g>
+              <g class="plan__north" transform="translate(${right - 34} ${ZOOM.y + 30})"><path d="M0 -10 L4.5 4.5 L0 1.5 L-4.5 4.5Z"/><text y="16" text-anchor="middle">N</text></g>
+              <g class="plan__scale" transform="translate(${right - 134} ${ZOOM.y + 66})"><line x1="0" y1="0" x2="100" y2="0"/><line x1="0" y1="-3" x2="0" y2="3"/><line x1="100" y1="-3" x2="100" y2="3"/><text x="50" y="-6" text-anchor="middle">100 m</text></g>
             </g>
           </svg>
           <div class="plan__bar">

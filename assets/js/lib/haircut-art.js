@@ -165,7 +165,7 @@ export function haircutSvg(art, { highlight = false, title = '', id = 'cut' } = 
   const shortSides = men || art.len === 'pixie' || art.len === 'ear';
   const ears = shortSides ? `<ellipse cx="69" cy="104" rx="5" ry="9" fill="${SKIN_SHADE}"/><ellipse cx="131" cy="104" rx="5" ry="9" fill="${SKIN_SHADE}"/>` : '';
   const label = title ? `<title>${title}</title>` : '';
-  const svg = `<svg viewBox="0 0 200 210" role="img" xmlns="http://www.w3.org/2000/svg">${label}
+  const svg = `<svg viewBox="0 0 200 210" ${title ? 'role="img"' : 'aria-hidden="true"'} xmlns="http://www.w3.org/2000/svg">${label}
 <defs><linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stop-color="${LIGHT}" stop-opacity="0"/><stop offset="1" stop-color="${LIGHT}"/></linearGradient>
 <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${HAIR}"/><stop offset="1" stop-color="${HAIR}" stop-opacity="0.15"/></linearGradient></defs>
 ${art.mullet ? `<path d="M70 110 Q66 150 62 176 L138 176 Q134 150 130 110Z" fill="${HAIR}"/>` : ''}${long ? backMass(art) : ''}

@@ -15,8 +15,11 @@ export function initStatus() {
   const update = () => {
     const now = salonNow();
     const { state, label } = openStatus(hours, now, reference);
+    const short = { open: 'Ouvert', closed: 'Fermé', maybe: 'Horaires' }[state];
     labels.forEach((element) => {
-      element.textContent = label;
+      (element.querySelector('[data-status-label]') || element).textContent = label;
+      const compact = element.querySelector('[data-status-short]');
+      if (compact) compact.textContent = short;
       element.dataset.state = state;
     });
     rows.forEach((row) => row.classList.toggle('is-today', Number(row.dataset.day) === now.weekday));

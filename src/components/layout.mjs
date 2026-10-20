@@ -4,7 +4,7 @@ import { salon } from '../data/salon.mjs';
 import { category, allServices } from '../data/services.mjs';
 import { bottleDefs } from '../../assets/js/lib/bottle.js';
 import { icon, sprite } from './icons.mjs';
-import { external, whatsappUrl, PAGES, hoursTable } from './blocks.mjs';
+import { external, whatsappUrl, PAGES, hoursTable, ribbon } from './blocks.mjs';
 
 const NAV = [
   { route: 'qui-suis-je/', label: 'Qui suis-je ?' },
@@ -124,6 +124,23 @@ function hoursPopover(ctx) {
   </div>`;
 }
 
+// Éléments décoratifs du fond (decor.js) : forme, position (x en %, y de 0 à 1 sur une bande de 1,6 écran),
+// taille en px, angle, profondeur (0 : lointain et lent, 1 : proche et rapide).
+const DECOR = [
+  ['arch', 6, 0.08, 74, -8, 0.5], ['wave', 78, 0.04, 90, 12, 0.3], ['sparkle', 46, 0.16, 34, 0, 0.9],
+  ['curl', 88, 0.22, 58, 20, 0.7], ['dots', 22, 0.3, 54, -6, 0.4], ['leaf', 64, 0.36, 46, 30, 0.8],
+  ['ring', 4, 0.44, 64, 0, 0.35], ['scissors', 92, 0.5, 44, -24, 0.6], ['wave', 34, 0.56, 110, -10, 0.25],
+  ['drop', 72, 0.62, 36, 8, 0.85], ['arch', 52, 0.7, 56, 6, 0.45], ['sparkle', 12, 0.76, 28, 0, 1],
+  ['comb', 84, 0.82, 80, -14, 0.5], ['curl', 28, 0.88, 50, -30, 0.65], ['ring', 60, 0.94, 40, 0, 0.75],
+  ['dots', 94, 0.12, 40, 90, 0.55], ['leaf', 16, 0.6, 38, -40, 0.4], ['sparkle', 70, 0.26, 22, 0, 0.95],
+];
+const decor = () => html`<div class="decor" aria-hidden="true" data-decor>
+    ${DECOR.map(([shape, x, y, size, angle, depth]) => html`<span class="decor__item" style="${`--x:${x}%;--y:${y};--s:${size}px;--r:${angle}deg;--depth:${depth}`}"><svg><use href="#i-deco-${shape}"/></svg></span>`)}
+  </div>`;
+
+// Interrupteur « Animations complètes » (motion-toggle.js) : remplace le réglage du système pour ce site.
+const motionToggle = () => html`<button class="motion-toggle" type="button" role="switch" aria-checked="true" data-motion-toggle><span class="motion-toggle__track" aria-hidden="true"></span>Animations complètes</button>`;
+
 const logo = (ctx) => html`<a class="logo" href="${ctx.rel('')}" aria-label="Un Brun d’Hair, accueil">Un Brun <em>d’Hair</em></a>`;
 
 function header(ctx) {
@@ -153,6 +170,7 @@ function header(ctx) {
         <button class="menu-btn" type="button" aria-haspopup="dialog" aria-controls="menu" data-menu-open>Menu <span class="menu-btn__lines" aria-hidden="true"></span></button>
       </div>
     </div>
+    <span class="progress" aria-hidden="true"></span>
   </header>`;
 }
 
@@ -176,6 +194,7 @@ function menu(ctx) {
         <a class="btn btn--primary btn--block" href="${salon.links.planity}"${external} data-track="planity">Je réserve sur Planity</a>
         ${statusButton()}
         <p>${salon.address.street}, ${salon.address.postalCode} ${salon.address.city}<br><a href="tel:${salon.phone.tel}" data-track="phone">${salon.phone.display}</a></p>
+        ${motionToggle()}
       </div>
     </div>
   </dialog>`;
@@ -238,6 +257,7 @@ function footer(ctx) {
           <li><a href="${ctx.rel('mentions-legales/')}">Mentions légales</a></li>
           <li><a href="${ctx.rel('cgv/')}">Conditions de vente</a></li>
           <li><a href="${ctx.rel('confidentialite/')}">Confidentialité</a></li>
+          <li>${motionToggle()}</li>
         </ul>
       </div>
     </div>
@@ -289,7 +309,7 @@ export function layout(page, ctx) {
   <meta property="og:image:alt" content="Un Brun d’Hair, salon de coiffure à Aubière">
   <meta name="twitter:card" content="summary_large_image">
 
-  <script>document.documentElement.classList.add('js');setTimeout(()=>{if(!document.documentElement.classList.contains('is-ready'))document.documentElement.classList.remove('js')},4000);</script>
+  <script>(function(){var d=document.documentElement,m;d.classList.add('js');try{m=localStorage.getItem('ubdh-animations')}catch(e){}d.dataset.motion=m||(matchMedia('(prefers-reduced-motion: reduce)').matches?'calm':'full');setTimeout(function(){if(!d.classList.contains('is-ready'))d.classList.remove('js')},4000)})();</script>
   <link rel="preload" href="${ctx.asset('assets/fonts/instrument-serif.woff2')}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="${ctx.asset('assets/fonts/instrument-sans.woff2')}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="${ctx.asset('assets/css/site.css')}">
@@ -298,6 +318,8 @@ export function layout(page, ctx) {
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <div class="backdrop" aria-hidden="true">${ribbon('backdrop')}<span class="backdrop__mono">B</span></div>
+  ${decor()}
   ${header(ctx)}
   ${menu(ctx)}
   ${hoursPopover(ctx)}

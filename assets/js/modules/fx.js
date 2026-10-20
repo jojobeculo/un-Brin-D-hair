@@ -1,8 +1,8 @@
-// Effets réservés à l’ordinateur (souris, écran large, mouvements autorisés) : chargé à la demande par main.js.
-// Curseur, traînée dorée dans l’accueil, ruban organique qui réagit à la souris, orbes de lumière avec inertie,
-// boutons magnétiques, cartes inclinées en 3D, reflet liquide sur les photos et plan en relief.
+// Effets réservés aux appareils avec souris : chargé à la demande par main.js.
+// Curseur, traînée dorée, orbes avec inertie, boutons magnétiques et cartes inclinées ;
+// le plan en relief seulement en animations complètes.
 // Une seule boucle requestAnimationFrame, arrêtée dès que tout est immobile.
-import { ribbonPaths, RIBBONS } from '../lib/ribbon.js';
+import { calm } from '../lib/motion-pref.js';
 
 const mouse = { x: innerWidth / 2, y: innerHeight / 2, moved: 0 };
 const systems = [];
@@ -111,90 +111,55 @@ function cursor() {
   });
 }
 
-// ---------- Traînée dorée (accueil) ----------
+// ---------- Traînée dorée « mèche de soie » ----------
 
 function trail() {
-  const hero = document.querySelector('[data-hero]');
-  if (!hero) return;
   const canvas = document.createElement('canvas');
   canvas.className = 'trail';
   canvas.setAttribute('aria-hidden', 'true');
-  hero.prepend(canvas);
+  document.body.append(canvas);
   const context = canvas.getContext('2d');
   const points = [];
   let last = null;
+  const LIFE = 420;
   const resize = () => {
     const ratio = Math.min(2, devicePixelRatio || 1);
-    canvas.width = hero.clientWidth * ratio;
-    canvas.height = hero.clientHeight * ratio;
+    canvas.width = innerWidth * ratio;
+    canvas.height = innerHeight * ratio;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
   };
   resize();
   addEventListener('resize', resize);
 
-  hero.addEventListener('pointermove', (event) => {
+  addEventListener('pointermove', (event) => {
+    if (event.pointerType !== 'mouse') return;
     const now = performance.now();
-    const rect = hero.getBoundingClientRect();
-    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top, t: now };
-    // Seuls les gestes rapides laissent une traînée.
-    if (last && Math.hypot(point.x - last.x, point.y - last.y) / Math.max(1, now - last.t) > 0.7) points.push(point);
+    const point = { x: event.clientX, y: event.clientY, t: now };
+    // Seuls les gestes vifs laissent une traînée.
+    if (last && Math.hypot(point.x - last.x, point.y - last.y) / Math.max(1, now - last.t) > 0.45) points.push(point);
     last = point;
-  });
+  }, { passive: true });
 
   systems.push((now) => {
-    while (points.length && now - points[0].t > 320) points.shift();
+    while (points.length && now - points[0].t > LIFE) points.shift();
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.lineCap = 'round';
     for (let i = 1; i < points.length; i += 1) {
       const a = points[i - 1];
       const b = points[i];
-      const life = 1 - (now - b.t) / 320;
-      context.strokeStyle = `rgba(201, 162, 122, ${(life * 0.55).toFixed(3)})`;
-      context.lineWidth = 0.5 + life * 2.2;
-      context.lineCap = 'round';
+      if (b.t - a.t > 60) continue;
+      const life = 1 - (now - b.t) / LIFE;
+      context.strokeStyle = `rgba(201, 162, 122, ${(life * 0.18).toFixed(3)})`;
+      context.lineWidth = 2 + life * 9;
       context.beginPath();
       context.moveTo(a.x, a.y);
       context.lineTo(b.x, b.y);
       context.stroke();
+      context.strokeStyle = `rgba(217, 181, 142, ${(life * 0.7).toFixed(3)})`;
+      context.lineWidth = 0.6 + life * 2.4;
+      context.stroke();
     }
     return points.length > 0;
-  });
-}
-
-// ---------- Ruban organique ----------
-
-function ribbons() {
-  const visible = visibleSet('[data-ribbon]');
-  const states = new Map();
-  systems.push(() => {
-    let active = false;
-    visible.forEach((element) => {
-      const shape = RIBBONS[element.dataset.ribbon];
-      const svg = element.querySelector('svg');
-      const rect = svg.getBoundingClientRect();
-      const state = states.get(element) || { phase: 0, strength: 0, x: 720, y: 450, key: '' };
-      states.set(element, state);
-      const scale = Math.max(rect.width / 1440, rect.height / 900);
-      const x = (mouse.x - rect.left - (rect.width - 1440 * scale) / 2) / scale;
-      const y = (mouse.y - rect.top - (rect.height - 900 * scale) / 2) / scale;
-      const inside = mouse.y > rect.top && mouse.y < rect.bottom;
-      const phaseTarget = ((rect.top + rect.height / 2 - innerHeight / 2) / innerHeight) * 2.4;
-      state.phase = lerp(state.phase, phaseTarget, 0.08);
-      state.strength = lerp(state.strength, inside ? 1 : 0, 0.06);
-      state.x = lerp(state.x, x, 0.12);
-      state.y = lerp(state.y, y, 0.12);
-      const key = `${state.phase.toFixed(3)}|${state.strength.toFixed(3)}|${state.x.toFixed(0)}|${state.y.toFixed(0)}`;
-      if (key === state.key) return;
-      state.key = key;
-      active = true;
-      const paths = ribbonPaths(shape.points, { ...shape, phase: state.phase, pointer: { x: state.x, y: state.y, radius: 240, strength: state.strength * 0.5 } });
-      element.querySelectorAll('path').forEach((node, index) => node.setAttribute('d', paths[index]));
-      const light = element.querySelector('radialGradient');
-      light.setAttribute('cx', state.x.toFixed(0));
-      light.setAttribute('cy', state.y.toFixed(0));
-      light.setAttribute('r', (700 - state.strength * 380).toFixed(0));
-      element.style.setProperty('--ribbon-w', (1 + state.strength * 0.7).toFixed(2));
-    });
-    return active;
   });
 }
 
@@ -275,56 +240,6 @@ function tilt() {
   document.addEventListener('pointerleave', () => current && reset(current));
 }
 
-// ---------- Reflet liquide sur les photos ----------
-
-function liquid() {
-  const holder = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  holder.setAttribute('aria-hidden', 'true');
-  holder.setAttribute('width', '0');
-  holder.setAttribute('height', '0');
-  holder.style.position = 'absolute';
-  holder.innerHTML = '<filter id="liquid" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.011 0.019" numOctaves="2" seed="4" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>';
-  document.body.append(holder);
-  const turbulence = holder.querySelector('feTurbulence');
-  const displacement = holder.querySelector('feDisplacementMap');
-  let hovered = null;
-  let fading = null;
-  let start = 0;
-  let scale = 0;
-
-  document.querySelectorAll('[data-liquid]').forEach((element) => {
-    element.addEventListener('pointerenter', () => {
-      if (fading && fading !== element) fading.classList.remove('is-liquid');
-      hovered = element;
-      fading = null;
-      start = performance.now();
-      element.classList.add('is-liquid');
-      wake();
-    });
-    element.addEventListener('pointerleave', () => {
-      fading = element;
-      hovered = null;
-      wake();
-    });
-  });
-
-  systems.push((now) => {
-    if (!hovered && !fading) return false;
-    const elapsed = now - start;
-    const target = hovered ? 7 + 16 * Math.exp(-elapsed / 650) : 0;
-    scale = lerp(scale, target, 0.12);
-    const wobble = Math.sin(now / 900);
-    turbulence.setAttribute('baseFrequency', `${(0.011 + wobble * 0.003).toFixed(4)} ${(0.019 - wobble * 0.004).toFixed(4)}`);
-    displacement.setAttribute('scale', scale.toFixed(2));
-    if (!hovered && scale < 0.2) {
-      fading?.classList.remove('is-liquid');
-      fading = null;
-      return false;
-    }
-    return true;
-  });
-}
-
 // ---------- Plan du quartier en relief ----------
 
 function planDepth() {
@@ -341,7 +256,12 @@ function planDepth() {
   });
 }
 
-export function initFx() {
+export function initFx(first) {
+  if (first) {
+    mouse.x = first.clientX;
+    mouse.y = first.clientY;
+    mouse.moved = 1;
+  }
   addEventListener('pointermove', (event) => {
     if (event.pointerType !== 'mouse') return;
     mouse.x = event.clientX;
@@ -350,7 +270,8 @@ export function initFx() {
     wake();
   }, { passive: true });
   addEventListener('scroll', wake, { passive: true });
-  [cursor, trail, ribbons, orbs, magnetic, tilt, liquid, planDepth].forEach((init) => {
+  const effects = calm() ? [cursor, trail, orbs, magnetic, tilt] : [cursor, trail, orbs, magnetic, tilt, planDepth];
+  effects.forEach((init) => {
     try {
       init();
     } catch (error) {

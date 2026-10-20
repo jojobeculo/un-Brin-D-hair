@@ -44,7 +44,7 @@ export default function accueil(ctx) {
         </div>
         <div class="hero__media">
           <span class="hero__monogram" aria-hidden="true">B</span>
-          <div class="arch" data-liquid data-cursor="Voir">
+          <div class="arch" data-zoom data-cursor="Voir">
             ${photo(ctx, 'sandy-salon', { alt: 'Sandy devant la vitrine de son salon Un Brun d’Hair, rue Champvoisin à Aubière', sizes: '(min-width: 900px) 440px, 86vw', eager: true })}
           </div>
           <p class="hero__caption"><strong>Sandy</strong>Coiffeuse depuis ${salon.story.experienceYears} ans, à votre écoute</p>

@@ -41,17 +41,23 @@ Sur chaque page :
 | Titre « Un Brun d’Hair » dessiné au trait puis rempli | Accueil | `assets/css/site.css` |
 | Titres révélés mot à mot, mots en italique soulignés | Toutes les pages | `assets/js/modules/reveal.js` |
 | Phrase qui s’éclaire mot à mot au défilement | Accueil | `reveal.js` |
-| Fond qui passe du lin à l’expresso | Réservation, questionnaire, boutique, bandeaux finaux | `assets/js/modules/ambient.js` |
+| Fond qui glisse progressivement du lin à l’expresso au défilement | Réservation, questionnaire, boutique, bandeaux finaux | `assets/js/modules/ambient.js` |
 | Ruban organique, orbes de lumière, parallaxe | Accueil, Qui suis-je, questionnaire, réservation | `ambient.js`, `motion.js`, `fx.js` |
 | Plan du quartier qui se dessine, trajets à pied animés | Accueil, Contact | `assets/js/modules/plan.js` |
 | Avant / après à glisser (aller-retour de démonstration à l’apparition) | Accueil, Réalisations, Coupe femme, Coloration, Balayage | `assets/js/modules/compare.js` |
 | Onde au clic sur les boutons | Toutes les pages | `motion.js` |
-| Curseur, traînée dorée, boutons magnétiques, cartes inclinées, reflet liquide sur les photos | Ordinateur uniquement | `assets/js/modules/fx.js` |
+| Curseur, traînée dorée, boutons magnétiques, cartes inclinées, orbes qui suivent la souris | Appareils avec souris | `assets/js/modules/fx.js` |
+| Ruban de fond permanent et monogramme, qui suivent le défilement, la souris et le doigt | Toutes les pages | `assets/js/modules/ribbon-live.js` |
+| Barre de progression du défilement, onde au toucher, survols (voisins estompés, lignes qui s’allongent) | Toutes les pages | `motion.js`, `site.css` |
 
-`fx.js` ne se charge que sur un ordinateur (souris, écran d’au moins 1024 px) : les téléphones
-ne le téléchargent pas. Rien ne bouge en continu pendant le chargement de la page : les orbes
-s’animent à la première interaction. Si le visiteur demande moins d’animations dans son
-système (`prefers-reduced-motion`), les mouvements s’arrêtent et tout s’affiche directement.
+`fx.js` se charge au premier mouvement d’une souris : les téléphones ne le téléchargent pas.
+Rien ne bouge en continu pendant le chargement de la page : les orbes s’animent à la première interaction.
+
+**Animations complètes ou douces.** Quand le système demande moins d’animations (sous Windows :
+*Paramètres › Accessibilité › Effets visuels › Effets d’animation* désactivé), le site passe en mode
+doux : le curseur, les rubans, les orbes, les effets de clic et de survol et le passage en sombre
+restent ; la parallaxe et les glissements d’entrée deviennent des fondus. L’interrupteur
+« Animations complètes », dans le menu et le pied de page, remplace ce réglage pour le site.
 
 ## Modifier le contenu
 

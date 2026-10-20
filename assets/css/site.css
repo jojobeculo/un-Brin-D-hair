@@ -38,7 +38,8 @@
   --line: rgb(51 36 27 / 14%);
 
   /* Couleurs de la page : elles basculent en ambiance sombre (html.is-dark, ambient.js). */
-  --bg: var(--lin);
+  /* --mix (0 à 1, ambient.js) : le fond glisse progressivement du lin à l’expresso au défilement. */
+  --bg: color-mix(in oklab, var(--lin), var(--expresso) calc(var(--mix) * 100%));
   --fg: var(--expresso);
   --fg-soft: var(--muted);
   --accent: var(--brun);
@@ -60,6 +61,7 @@
   --dock: 0px;
 }
 
+@property --mix { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --bg { syntax: '<color>'; inherits: true; initial-value: #F4EEE6; }
 @property --fg { syntax: '<color>'; inherits: true; initial-value: #33241B; }
 @property --fg-soft { syntax: '<color>'; inherits: true; initial-value: #66544A; }
@@ -68,9 +70,9 @@
 @property --btn-bg { syntax: '<color>'; inherits: true; initial-value: #6B4630; }
 @property --btn-fg { syntax: '<color>'; inherits: true; initial-value: #FBF8F4; }
 
-html { transition: --bg 0.9s var(--ease), --fg 0.9s var(--ease), --fg-soft 0.9s var(--ease), --accent 0.9s var(--ease), --rule 0.9s var(--ease), --btn-bg 0.9s var(--ease), --btn-fg 0.9s var(--ease); }
+html { transition: --mix 0.25s linear, --fg 0.6s var(--ease), --fg-soft 0.6s var(--ease), --accent 0.6s var(--ease), --rule 0.6s var(--ease), --btn-bg 0.6s var(--ease), --btn-fg 0.6s var(--ease); }
+.tone-dark, .band--dark { --bg: var(--expresso); }
 html.is-dark, .tone-dark, .band--dark {
-  --bg: var(--expresso);
   --fg: var(--creme);
   --fg-soft: var(--sable);
   --accent: var(--sable-fonce);
@@ -105,13 +107,10 @@ html {
   background: var(--bg);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-}
+html:not([data-motion="calm"]) { scroll-behavior: smooth; }
 
 body {
   min-height: 100vh;
-  background: var(--bg);
   color: var(--fg);
   font: 400 1.0625rem/1.65 var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -184,8 +183,8 @@ mark { background: linear-gradient(transparent 62%, var(--sable-fonce) 62%); col
   margin-inline: auto;
 }
 .section { padding-block: var(--section); }
-.band { background: var(--sable); }
-.band--creme { background: var(--creme); }
+.band { background: color-mix(in srgb, var(--sable) 86%, transparent); }
+.band--creme { background: color-mix(in srgb, var(--creme) 86%, transparent); }
 .band--dark { background: var(--bg); color: var(--fg); }
 
 .section__head { display: grid; gap: 1.25rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); max-width: 52rem; }
@@ -257,6 +256,7 @@ mark { background: linear-gradient(transparent 62%, var(--sable-fonce) 62%); col
 }
 .header.is-scrolled { background: color-mix(in srgb, var(--bg) 88%, transparent); box-shadow: 0 1px 0 var(--rule); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .header.is-hidden { transform: translateY(-100%); }
+.header.is-scrolled .header__inner { height: 100%; }
 .header__inner {
   height: 100%;
   width: min(100% - 2 * var(--gutter), 1400px); margin-inline: auto;
@@ -523,7 +523,7 @@ html:has(dialog[open]) { overflow: hidden; }
 .ribbon { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
 .ribbon svg { width: 100%; height: 100%; }
 .ribbon g { fill: none; stroke-width: 1; stroke-linecap: round; }
-.ribbon path { opacity: calc(0.35 + 0.05 * var(--i)); vector-effect: non-scaling-stroke; stroke-width: var(--ribbon-w, 1); }
+.ribbon path { opacity: calc(0.4 + 0.05 * var(--i)); vector-effect: non-scaling-stroke; stroke-width: var(--ribbon-w, 1.15); transition: opacity 0.6s var(--ease); }
 .js .ribbon path { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .js .ribbon.is-in path { stroke-dashoffset: 0; transition: stroke-dashoffset 2.6s var(--ease) calc(var(--i) * 0.06s); }
 .ribbon--hero svg { translate: 0 calc(var(--hero-p, 0) * 140px); }
@@ -548,7 +548,73 @@ html.is-alive .orb { animation-play-state: running; }
 .tone-dark .orb--1, html.is-dark [data-ambient] .orb--1 { --orb: rgb(201 162 122 / 40%); }
 .tone-dark .orb--2, html.is-dark [data-ambient] .orb--2 { --orb: rgb(169 130 95 / 35%); }
 
-.trail { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.trail { position: fixed; inset: 0; z-index: 88; width: 100%; height: 100%; pointer-events: none; }
+
+/* Fond permanent : un ruban de soie et le monogramme, fixés derrière tout le site (ribbon-live.js).
+   Ils apparaissent après le haut de l’accueil et bougent avec le défilement, la souris et le doigt. */
+.backdrop { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: var(--backdrop-o, 1); transition: opacity 0.6s var(--ease); }
+.backdrop .ribbon { inset: -6% -4%; translate: 0 calc(var(--page-p, 0) * -6%); }
+.backdrop .ribbon path { opacity: calc(0.18 + 0.03 * var(--i)); }
+html.is-dark .backdrop .ribbon path { opacity: calc(0.28 + 0.04 * var(--i)); }
+.backdrop__mono {
+  position: absolute; right: -6vw; bottom: -14vh;
+  font-family: var(--serif); font-style: italic; line-height: 1; font-size: clamp(22rem, 48vw, 46rem);
+  color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--noisette) 45%, transparent);
+  rotate: calc(var(--page-p, 0) * -14deg); translate: 0 calc(var(--page-p, 0) * -8vh);
+  user-select: none;
+}
+
+/* Éléments décoratifs du fond (decor.js) : ils flottent, glissent au défilement à des vitesses différentes,
+   s’écartent de la souris ou du doigt, et grossissent en s’éclairant à leur approche. */
+.decor { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.decor__item {
+  position: absolute; left: var(--x); top: 0;
+  width: var(--s); color: var(--noisette);
+  opacity: calc(0.3 + var(--near, 0) * 0.55);
+  /* Position verticale par transform seulement (aucun décalage de mise en page) ; decor.js remplace --ty. */
+  transform: translate3d(var(--tx, 0px), var(--ty, calc(var(--y) * 100vh)), 0) rotate(calc(var(--r) + var(--rot, 0deg))) scale(calc(1 + var(--near, 0) * 0.5));
+  transition: color 0.6s var(--ease);
+  will-change: transform;
+}
+.decor__item svg { display: block; width: 100%; aspect-ratio: 1; overflow: visible; stroke-width: calc(1.4 + var(--near, 0) * 1.8); animation: float 9s ease-in-out infinite alternate; animation-delay: calc(var(--depth) * -7s); animation-play-state: paused; }
+html.is-alive .decor__item svg { animation-play-state: running; }
+html.is-dark .decor__item { color: #C9A27A; }
+@keyframes float { from { translate: 0 -6px; rotate: -4deg; } to { translate: 0 8px; rotate: 5deg; } }
+html[data-motion="calm"] .decor__item svg { animation: none; }
+
+/* Barre de progression du défilement */
+.progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; transform-origin: left; transform: scaleX(var(--scroll, 0)); background: linear-gradient(90deg, var(--noisette), #C9A27A); pointer-events: none; }
+
+/* Onde au toucher (téléphone) */
+.tap { position: fixed; left: 0; top: 0; z-index: 95; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; border: 1.5px solid #C9A27A; background: radial-gradient(circle, rgb(201 162 122 / 25%), transparent 70%); pointer-events: none; animation: burst 0.6s var(--ease-out) forwards; }
+
+/* Survols : les voisins s’effacent, les lignes s’allongent, les boutons s’élargissent */
+@media (hover: hover) {
+  :is(.cards, .quotes, .related, .shop__grid, .pmini, .insta, .benefits, .steps):has(> li:hover) > li:not(:hover),
+  .shots:has(> .shot:hover) > .shot:not(:hover),
+  .compares:has(> .compare:hover) > .compare:not(:hover) { opacity: 0.55; filter: saturate(0.85); }
+  :is(.cards, .why, .quotes, .related, .shop__grid, .pmini, .insta, .benefits, .steps) > li, .shots > .shot, .compares > .compare { transition: opacity 0.5s var(--ease), filter 0.5s var(--ease), transform 0.5s var(--ease); }
+  .section:hover > .section__head .kicker::before, .section:hover .kicker::before { width: 3.5rem; }
+  .btn:hover { padding-inline: 1.9rem; }
+  .btn--sm:hover { padding-inline: 1.4rem; }
+  .why li:hover .why__num { letter-spacing: 0.02em; color: var(--fg); }
+  .nav__link { background-image: linear-gradient(currentColor, currentColor); background-size: 0 1px; background-repeat: no-repeat; background-position: 50% 85%; transition: background-size 0.4s var(--ease), background-color 0.3s var(--ease); }
+  .nav__link:hover { background-size: calc(100% - 1.6rem) 1px; }
+  .footer a:not(.btn):hover { letter-spacing: 0.02em; }
+  .quote:hover { transform: translateY(-4px); }
+  .ribbon:hover path { opacity: 0.9; }
+}
+.kicker::before { transition: width 0.6s var(--ease-out); }
+.btn { transition: background-color 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease), transform 0.35s var(--ease), padding 0.45s var(--ease-out); }
+.why .why__num { transition: letter-spacing 0.6s var(--ease-out), color 0.4s var(--ease); }
+.footer a { transition: letter-spacing 0.4s var(--ease); }
+
+/* Interrupteur des animations (menu et pied de page) */
+.motion-toggle { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 2.75rem; padding: 0; border: 0; background: none; font: inherit; font-size: 0.8125rem; color: inherit; cursor: pointer; }
+.motion-toggle__track { position: relative; width: 2.4rem; height: 1.35rem; border-radius: 999px; background: color-mix(in srgb, currentColor 25%, transparent); transition: background-color 0.3s var(--ease); }
+.motion-toggle__track::after { content: ''; position: absolute; top: 0.2rem; left: 0.2rem; width: 0.95rem; height: 0.95rem; border-radius: 50%; background: currentColor; transition: translate 0.35s var(--ease-out); }
+.motion-toggle[aria-checked='true'] .motion-toggle__track { background: #C9A27A; }
+.motion-toggle[aria-checked='true'] .motion-toggle__track::after { translate: 1.05rem 0; background: var(--creme); }
 
 /* Sections qui font passer la page en ambiance sombre (ambient.js) */
 [data-ambient] { position: relative; isolation: isolate; }
@@ -1026,10 +1092,9 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 
 /* ---------- Effets sur ordinateur (fx.js) ---------- */
 
-[data-liquid] { overflow: hidden; }
-[data-liquid] img { transform: scale(1.08); transition: transform 1.4s var(--ease-out); }
-[data-liquid]:hover img { transform: scale(1); }
-[data-liquid].is-liquid img { filter: url(#liquid); }
+[data-zoom] { overflow: hidden; }
+[data-zoom] img { transform: scale(1.08); transition: transform 1.4s var(--ease-out); }
+[data-zoom]:hover img { transform: scale(1); }
 
 [data-tilt] { transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.6s var(--ease-out), box-shadow 0.5s var(--ease); transform-style: preserve-3d; }
 [data-tilt].is-tilting { transition: transform 0.12s linear, box-shadow 0.5s var(--ease); }
@@ -1056,14 +1121,11 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 .cursor.is-hidden { opacity: 0; }
 .cursor__burst { position: fixed; left: 0; top: 0; width: 80px; height: 80px; margin: -40px 0 0 -40px; border-radius: 50%; border: 1px solid #C9A27A; animation: burst 0.6s var(--ease-out) forwards; }
 @keyframes burst { from { scale: 0.2; opacity: 0.8; } to { scale: 1.3; opacity: 0; } }
-@media (pointer: fine) and (hover: hover) {
-  html.has-cursor, html.has-cursor a, html.has-cursor button, html.has-cursor summary, html.has-cursor label { cursor: none; }
-  html.has-cursor input, html.has-cursor textarea, html.has-cursor select { cursor: auto; }
-}
+html.has-cursor, html.has-cursor a, html.has-cursor button, html.has-cursor summary, html.has-cursor label, html.has-cursor .compare__frame { cursor: none; }
+html.has-cursor input, html.has-cursor textarea, html.has-cursor select { cursor: auto; }
 
 /* ---------- Transitions entre pages ---------- */
 
-@view-transition { navigation: auto; }
 ::view-transition-old(root) { animation: vt-out 0.28s var(--ease) both; }
 ::view-transition-new(root) { animation: vt-in 0.5s var(--ease-out) both; }
 @keyframes vt-out { to { opacity: 0; transform: translateY(-8px); } }
@@ -1073,12 +1135,22 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 
 /* ---------- Mouvement réduit ---------- */
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
-  .js [data-reveal], .split .w > span { opacity: 1; transform: none; clip-path: none; }
-  .js .statement__text .sw { color: var(--fg); }
-  .hero__text, .hero__media, .hero__monogram, .ribbon svg, [data-parallax] img, [data-magnetic] { transform: none !important; translate: none !important; }
-  .orb { animation: none !important; }
-  .js .wordmark text { fill-opacity: 1; stroke-opacity: 0; }
-  @view-transition { navigation: none; }
+/* ---------- Animations douces ----------
+   html[data-motion="calm"] : choisi par le visiteur, ou par défaut quand le système demande moins d’animations
+   (Windows : « Effets d’animation » désactivés). On garde le curseur, les rubans, les orbes, les effets de clic
+   et de survol et les changements de couleur ; parallaxe et glissements d’entrée deviennent des fondus. */
+html[data-motion="calm"] [data-reveal] { transform: none; }
+html[data-motion="calm"] [data-reveal='mask'] { clip-path: none; opacity: 0; transition: opacity 1s var(--ease); }
+html[data-motion="calm"] [data-reveal='mask'].is-in { opacity: 1; }
+html[data-motion="calm"] .split .w > span { transform: none; opacity: 0; transition: opacity 0.8s var(--ease); transition-delay: calc(var(--d, 0) * 0.04s); }
+html[data-motion="calm"] .split.is-in .w > span { opacity: 1; }
+html[data-motion="calm"] :is(.hero__text, .hero__media, .hero__monogram, .ribbon svg, [data-parallax] img, .backdrop__mono, .backdrop .ribbon) { translate: none !important; rotate: none !important; }
+html[data-motion="calm"] [data-parallax] img { scale: 1; }
+html[data-motion="calm"] :is(.shot, .compare__frame) { animation: none; }
+html[data-motion="calm"].js .hero__media .arch { animation: fade-in 1.2s var(--ease) 0.2s both; clip-path: none; }
+html[data-motion="calm"] .menu[open] .menu__list li { animation-name: fade-in; }
+@keyframes fade-in { from { opacity: 0; } }
+@view-transition { navigation: auto; }
+html[data-motion="calm"]::view-transition-old(root) { animation: none; }
+html[data-motion="calm"]::view-transition-new(root) { animation: fade-in 0.4s var(--ease) both; }
 }

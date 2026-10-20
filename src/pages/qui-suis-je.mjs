@@ -22,7 +22,7 @@ export default function quiSuisJe(ctx) {
     <section id="histoire" class="section has-ribbon" aria-labelledby="story-title">
       ${ribbon('story')}
       <div class="story">
-        <div class="arch" data-reveal="mask" data-liquid data-cursor="Voir">
+        <div class="arch" data-reveal="mask" data-zoom data-cursor="Voir">
           ${photo(ctx, 'outils', { alt: 'Ciseaux, peignes et brosses sur le plan de travail du salon', sizes: '(min-width: 960px) 40vw, 90vw' })}
         </div>
         <div class="story__text">

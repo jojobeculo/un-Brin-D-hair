@@ -75,6 +75,4 @@
 .quiz__product strong { display: block; font-size: 0.9375rem; font-weight: 600; }
 .quiz__product span span { font-size: 0.8125rem; color: var(--muted); }
 
-@media (prefers-reduced-motion: reduce) {
-  .result__score .result__gauge { stroke-dasharray: var(--dash) var(--full); }
-}
+html[data-motion="calm"] :is(.quiz__stage.is-entering > *, .quiz__options li, .result) { animation-name: fade-in; }

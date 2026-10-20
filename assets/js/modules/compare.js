@@ -1,6 +1,6 @@
 // Comparateur avant / après : glisser sur l’image (souris ou doigt), ou flèches du clavier sur le curseur.
 // À la première apparition, la ligne fait un aller-retour pour montrer que l’image se glisse.
-const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+import { calm } from '../lib/motion-pref.js';
 
 export function initCompare() {
   document.querySelectorAll('[data-compare]').forEach((figure) => {
@@ -40,7 +40,7 @@ export function initCompare() {
     frame.addEventListener('pointerup', stop);
     frame.addEventListener('pointercancel', stop);
 
-    if (reduced.matches) return;
+    if (calm()) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       observer.disconnect();

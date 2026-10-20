@@ -2,6 +2,21 @@ import { html, raw } from '../lib/html.mjs';
 
 const stroke = (paths, width = 2) => `<g fill="none" stroke="currentColor" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${paths}</g>`;
 
+// Formes décoratives du fond (decor.js) : sans épaisseur de trait, réglée en CSS (elle grossit à l’approche de la souris).
+const deco = (paths) => `<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${paths}</g>`;
+const DECO = {
+  'deco-arch': ['0 0 48 56', deco('<path d="M6 54V24a18 18 0 0 1 36 0v30"/><path d="M13 54V25a11 11 0 0 1 22 0v29"/>')],
+  'deco-wave': ['0 0 64 24', deco('<path d="M2 12c7-9 13-9 20 0s13 9 20 0 13-9 20 0"/>')],
+  'deco-curl': ['0 0 48 48', deco('<path d="M25 24a2 2 0 1 1-3-2 5 5 0 1 1 7 5 9 9 0 1 1-11-12 13 13 0 1 1-6 21"/>')],
+  'deco-ring': ['0 0 48 48', deco('<circle cx="24" cy="24" r="20"/><circle cx="24" cy="24" r="13" stroke-dasharray="2 5"/>')],
+  'deco-dots': ['0 0 48 16', '<g fill="currentColor"><circle cx="6" cy="8" r="2.4"/><circle cx="24" cy="8" r="2.4"/><circle cx="42" cy="8" r="2.4"/></g>'],
+  'deco-sparkle': ['0 0 48 48', deco('<path d="M24 4c1.6 9 4.6 12.4 14 14-9.4 1.6-12.4 5-14 14-1.6-9-4.6-12.4-14-14 9.4-1.6 12.4-5 14-14z"/>')],
+  'deco-leaf': ['0 0 48 48', deco('<path d="M8 40C8 20 20 8 42 6c0 22-12 34-34 34z"/><path d="M8 40c8-10 16-17 26-22"/>')],
+  'deco-scissors': ['0 0 48 48', deco('<circle cx="11" cy="12" r="6"/><circle cx="11" cy="36" r="6"/><path d="M16 15l26 21M16 33l26-21"/>')],
+  'deco-comb': ['0 0 64 24', deco('<path d="M4 6h56v5H4z"/><path d="M8 11v9M14 11v9M20 11v9M26 11v9M32 11v9M38 11v9M44 11v9M50 11v9M56 11v9"/>')],
+  'deco-drop': ['0 0 48 48', deco('<path d="M24 6s14 15 14 25a14 14 0 0 1-28 0C10 21 24 6 24 6z"/><path d="M18 32a6 6 0 0 0 6 6"/>')],
+};
+
 const SYMBOLS = {
   'arrow-right': ['0 0 24 24', stroke('<path d="M4 12h15M13 6l6 6-6 6"/>', 1.6)],
   'arrow-left': ['0 0 24 24', stroke('<path d="M20 12H5M11 6l-6 6 6 6"/>', 1.6)],
@@ -46,6 +61,6 @@ export function icon(name, className = '') {
 }
 
 export function sprite() {
-  const symbols = Object.entries(SYMBOLS).map(([name, [viewBox, body]]) => `<symbol id="i-${name}" viewBox="${viewBox}">${body}</symbol>`).join('\n    ');
+  const symbols = Object.entries({ ...SYMBOLS, ...DECO }).map(([name, [viewBox, body]]) => `<symbol id="i-${name}" viewBox="${viewBox}">${body}</symbol>`).join('\n    ');
   return raw(`<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n    ${symbols}\n  </svg>`);
 }

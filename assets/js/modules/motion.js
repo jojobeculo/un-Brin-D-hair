@@ -1,5 +1,6 @@
-// Mouvements liés au défilement (en-tête, fond de l’accueil, parallaxe des photos) et effet d’onde au clic.
-const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+// Mouvements liés au défilement (en-tête, barre de progression, fond de l’accueil, parallaxe des photos)
+// et effets au clic : onde dans les boutons, onde dorée sous le doigt.
+import { calm } from '../lib/motion-pref.js';
 
 function initHeader() {
   const header = document.querySelector('[data-header]');
@@ -7,6 +8,8 @@ function initHeader() {
   let last = scrollY;
   return () => {
     const y = scrollY;
+    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    header.style.setProperty('--scroll', (y / max).toFixed(4));
     header.classList.toggle('is-scrolled', y > 8);
     // Caché quand on descend, visible dès qu’on remonte (sauf si un sous-menu a le focus).
     const hide = y > 480 && y > last + 4 && !header.contains(document.activeElement);
@@ -41,10 +44,19 @@ function initParallax() {
   };
 }
 
-function initRipple() {
+function initClicks() {
   document.addEventListener('pointerdown', (event) => {
+    // Onde dorée sous le doigt (la souris a déjà la sienne, dessinée par le curseur).
+    if (event.pointerType !== 'mouse' && !event.target.closest('input, textarea, select')) {
+      const tap = document.createElement('span');
+      tap.className = 'tap';
+      tap.setAttribute('aria-hidden', 'true');
+      tap.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+      document.body.append(tap);
+      tap.addEventListener('animationend', () => tap.remove());
+    }
     const target = event.target.closest('.btn, .dock__main');
-    if (!target || reduced.matches) return;
+    if (!target) return;
     const rect = target.getBoundingClientRect();
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
@@ -57,9 +69,9 @@ function initRipple() {
 }
 
 export function initMotion() {
-  initRipple();
+  initClicks();
   const tasks = [initHeader()];
-  if (!reduced.matches) tasks.push(initHero(), initParallax());
+  if (!calm()) tasks.push(initHero(), initParallax());
   const active = tasks.filter(Boolean);
   let ticking = false;
   const run = () => {

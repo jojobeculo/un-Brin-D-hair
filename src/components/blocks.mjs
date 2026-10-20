@@ -62,7 +62,7 @@ export function contactActions(className = 'btn') {
 export function ribbon(name, className = '') {
   const shape = RIBBONS[name];
   const paths = ribbonPaths(shape.points, shape);
-  return html`<div class="${`ribbon ribbon--${name} ${className}`.trim()}" data-ribbon="${name}"${name === 'hero' ? '' : raw(' data-parallax')} aria-hidden="true">
+  return html`<div class="${`ribbon ribbon--${name} ${className}`.trim()}" data-ribbon="${name}"${name === 'hero' || name === 'backdrop' ? '' : raw(' data-parallax')} aria-hidden="true">
         <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
           <defs><radialGradient id="ribbon-light-${name}" gradientUnits="userSpaceOnUse" cx="720" cy="450" r="700"><stop offset="0" stop-color="#C9A27A"/><stop offset="0.55" stop-color="#A9825F"/><stop offset="1" stop-color="#A9825F" stop-opacity="0.35"/></radialGradient></defs>
           <g stroke="url(#ribbon-light-${name})">${paths.map((d, index) => html`<path d="${d}" pathLength="1" style="--i:${index}"/>`)}</g>
@@ -110,7 +110,7 @@ export function serviceCards(ctx, ids = SERVICES.map((item) => item.id), { headi
           const href = `${ctx.rel(cat.page)}${cat.anchor ? `#${cat.anchor}` : ''}`;
           return html`<li data-reveal style="--stagger:${index % 3}">
           <a class="card" href="${href}" data-cursor="Explorer">
-            <div class="card__media" data-liquid>${photo(ctx, item.image, { alt: item.alt, sizes: '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw' })}</div>
+            <div class="card__media" data-zoom>${photo(ctx, item.image, { alt: item.alt, sizes: '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw' })}</div>
             <div class="card__body">
               ${raw(`<${headingTag} class="card__title">${html`${item.title}`}</${headingTag}>`)}
               <p class="card__text">${item.text}</p>
@@ -135,7 +135,7 @@ export const SHOTS = [
 
 export function shots(ctx, items = SHOTS) {
   return html`<div class="shots">
-        ${items.map((item, index) => html`<figure class="${item.layout ? `shot shot--${item.layout}` : 'shot'}" data-reveal style="--stagger:${index % 4}" data-parallax data-liquid data-cursor="Voir">
+        ${items.map((item, index) => html`<figure class="${item.layout ? `shot shot--${item.layout}` : 'shot'}" data-reveal style="--stagger:${index % 4}" data-parallax data-zoom data-cursor="Voir">
           ${photo(ctx, item.image, { alt: item.alt, sizes: item.layout === 'wide' ? '(min-width: 900px) 50vw, 100vw' : '(min-width: 900px) 25vw, 50vw' })}
           <figcaption><strong>${item.title}</strong><span>${item.tag}</span></figcaption>
         </figure>`)}
@@ -154,7 +154,7 @@ export const GALLERY = [
 function compare(ctx, item, index) {
   const image = (state) => ctx.asset(`assets/img/avant-apres/${item.slug}-${state}.svg`);
   return html`<figure class="compare" data-compare data-reveal style="--stagger:${index % 2}">
-          <div class="compare__frame" data-cursor="Glisser" data-liquid>
+          <div class="compare__frame" data-cursor="Glisser" data-zoom>
             <img class="compare__img" src="${image('apres')}" alt="${item.after}" width="800" height="1000" loading="lazy" decoding="async">
             <img class="compare__img compare__img--before" src="${image('avant')}" alt="${item.before}" width="800" height="1000" loading="lazy" decoding="async">
             <span class="compare__tag">Avant</span>

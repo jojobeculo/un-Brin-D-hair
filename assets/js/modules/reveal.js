@@ -1,6 +1,5 @@
 // Apparitions au défilement : blocs [data-reveal], titres découpés en mots [data-split],
 // phrase qui s’éclaire mot à mot [data-words], compteurs [data-count] et traits [data-reveal-line].
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Enveloppe chaque mot d’un élément dans <span class="w"><span>…</span></span>, sans toucher aux balises (em, br…).
 function splitWords(element, className) {
@@ -38,7 +37,7 @@ function countUp(element) {
   const target = Number(element.dataset.count);
   const decimals = element.dataset.count.includes('.') ? 1 : 0;
   const format = (value) => value.toFixed(decimals).replace('.', ',');
-  if (reduced || !Number.isFinite(target)) return;
+  if (!Number.isFinite(target)) return;
   const start = performance.now();
   const step = (now) => {
     const t = Math.min(1, (now - start) / 1100);
@@ -80,7 +79,7 @@ export function initReveal() {
   });
   document.querySelectorAll('[data-words]').forEach((element) => {
     splitWords(element, 'sw');
-    if (!reduced) litWords(element);
+    litWords(element);
   });
 
   // Le titre principal s’anime dès le chargement.

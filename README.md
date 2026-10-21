@@ -56,10 +56,12 @@ Sur chaque page :
 Rien ne bouge en continu pendant le chargement de la page : les orbes s’animent à la première interaction.
 
 **Qualité adaptée à la machine.** Le site mesure sa fluidité réelle dans le navigateur du visiteur
-(`assets/js/lib/perf.js`) et choisit l’un des trois niveaux suivants. Il les note sur `<html data-perf>` et
-garde le résultat pour les visites suivantes. Au départ, il part d’un indice tiré de la carte graphique.
+(`assets/js/lib/perf.js`) et choisit l’un des trois niveaux suivants. Il les note sur `<html data-perf>`.
+Au départ, il part d’un indice tiré de la carte graphique. Il baisse le niveau seulement après deux mesures
+lentes de suite, et pas pendant les premières secondes du chargement. Il garde une baisse 7 jours, puis
+mesure la machine à nouveau.
 - `high` : tous les effets ;
-- `lite` (puce graphique intégrée, ou moins de 45 images par seconde) : sans flou d’arrière-plan ni
+- `lite` (ancienne puce Intel HD ou UHD, puce de téléphone, ou moins de 45 images par seconde) : sans flou d’arrière-plan ni
   dérive des orbes, moitié moins de formes et de poussière, rubans figés au défilement ;
 - `min` (rendu sans carte graphique, ou moins de 28 images par seconde) : l’essentiel, sans ruban de
   fond, formes ni poussière.

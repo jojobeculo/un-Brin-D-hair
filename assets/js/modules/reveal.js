@@ -1,5 +1,6 @@
 // Apparitions au défilement : blocs [data-reveal], titres découpés en mots [data-split],
 // phrase qui s’éclaire mot à mot [data-words], compteurs [data-count] et traits [data-reveal-line].
+import { viewBox } from '../lib/geometry.js';
 
 // Enveloppe chaque mot d’un élément dans <span class="w"><span>…</span></span>, sans toucher aux balises (em, br…).
 function splitWords(element, className) {
@@ -52,7 +53,7 @@ function litWords(container) {
   let ticking = false;
   const update = () => {
     ticking = false;
-    const rect = container.getBoundingClientRect();
+    const rect = viewBox(container);
     const vh = innerHeight;
     const progress = Math.min(1, Math.max(0, (vh * 0.85 - rect.top) / (vh * 0.55)));
     const lit = Math.ceil(progress * words.length);

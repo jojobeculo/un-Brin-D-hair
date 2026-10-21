@@ -3,6 +3,8 @@
 // le plan en relief seulement en animations complètes.
 // Une seule boucle requestAnimationFrame, arrêtée dès que tout est immobile.
 import { calm } from '../lib/motion-pref.js';
+import { viewBox } from '../lib/geometry.js';
+import { perfLevel, sampleFrame } from '../lib/perf.js';
 
 const mouse = { x: innerWidth / 2, y: innerHeight / 2, moved: 0 };
 const systems = [];
@@ -14,7 +16,10 @@ function loop(now) {
     if (system(now)) active = true;
   });
   running = active;
-  if (running) requestAnimationFrame(loop);
+  if (running) {
+    sampleFrame(now);
+    requestAnimationFrame(loop);
+  }
 }
 
 function wake() {
@@ -122,11 +127,10 @@ function trail() {
   const points = [];
   let last = null;
   const LIFE = 420;
+  // Définition simple : une traînée floue n’a pas besoin de la haute définition, et c’est 4 fois moins de pixels.
   const resize = () => {
-    const ratio = Math.min(2, devicePixelRatio || 1);
-    canvas.width = innerWidth * ratio;
-    canvas.height = innerHeight * ratio;
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
   };
   resize();
   addEventListener('resize', resize);
@@ -202,7 +206,7 @@ function magnetic() {
   });
   addEventListener('pointermove', () => {
     buttons.forEach((button) => {
-      const rect = button.getBoundingClientRect();
+      const rect = viewBox(button);
       const dx = mouse.x - (rect.left + rect.width / 2);
       const dy = mouse.y - (rect.top + rect.height / 2);
       const reach = Math.max(rect.width, rect.height) * 0.85;
@@ -228,7 +232,7 @@ function tilt() {
     if (current && current !== element) reset(current);
     current = element;
     if (!element) return;
-    const rect = element.getBoundingClientRect();
+    const rect = viewBox(element);
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
     element.classList.add('is-tilting');
@@ -245,7 +249,7 @@ function tilt() {
 function planDepth() {
   document.querySelectorAll('[data-plan]').forEach((plan) => {
     plan.addEventListener('pointermove', (event) => {
-      const rect = plan.getBoundingClientRect();
+      const rect = viewBox(plan);
       plan.style.setProperty('--px', `${(((event.clientX - rect.left) / rect.width - 0.5) * 14).toFixed(1)}px`);
       plan.style.setProperty('--py', `${(((event.clientY - rect.top) / rect.height - 0.5) * 10).toFixed(1)}px`);
     });
@@ -270,7 +274,12 @@ export function initFx(first) {
     wake();
   }, { passive: true });
   addEventListener('scroll', wake, { passive: true });
-  const effects = calm() ? [cursor, trail, orbs, magnetic, tilt] : [cursor, trail, orbs, magnetic, tilt, planDepth];
+  // Qualité allégée : sans orbes qui suivent la souris ni plan en relief ; essentielle : sans traînée non plus.
+  const level = perfLevel();
+  const effects = [cursor, magnetic, tilt];
+  if (level !== 'min') effects.push(trail);
+  if (level === 'high') effects.push(orbs);
+  if (level === 'high' && !calm()) effects.push(planDepth);
   effects.forEach((init) => {
     try {
       init();

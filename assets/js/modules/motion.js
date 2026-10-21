@@ -1,6 +1,8 @@
 // Mouvements liés au défilement (en-tête, barre de progression, fond de l’accueil, parallaxe des photos)
 // et effets au clic : onde dans les boutons, onde dorée sous le doigt.
 import { calm } from '../lib/motion-pref.js';
+import { box, viewBox } from '../lib/geometry.js';
+import { perfLevel } from '../lib/perf.js';
 
 function initHeader() {
   const header = document.querySelector('[data-header]');
@@ -8,7 +10,7 @@ function initHeader() {
   let last = scrollY;
   return () => {
     const y = scrollY;
-    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    const max = Math.max(1, box(document.body).height - innerHeight);
     header.style.setProperty('--scroll', (y / max).toFixed(4));
     header.classList.toggle('is-scrolled', y > 8);
     // Caché quand on descend, visible dès qu’on remonte (sauf si un sous-menu a le focus).
@@ -23,7 +25,8 @@ function initHero() {
   const hero = document.querySelector('.hero');
   if (!hero) return;
   return () => {
-    const progress = Math.min(1, Math.max(0, scrollY / hero.offsetHeight));
+    if (perfLevel() !== 'high') return;
+    const progress = Math.min(1, Math.max(0, scrollY / box(hero).height));
     hero.style.setProperty('--hero-p', progress.toFixed(3));
   };
 }
@@ -35,9 +38,10 @@ function initParallax() {
   }, { rootMargin: '10% 0px' });
   document.querySelectorAll('[data-parallax]').forEach((element) => observer.observe(element));
   return () => {
+    if (perfLevel() !== 'high') return;
     const vh = innerHeight;
     visible.forEach((element) => {
-      const rect = element.getBoundingClientRect();
+      const rect = viewBox(element);
       const offset = (rect.top + rect.height / 2 - vh / 2) / vh;
       element.style.setProperty('--p', Math.max(-1, Math.min(1, offset)).toFixed(3));
     });

@@ -1,7 +1,10 @@
 // Poussière dorée en arrière-plan : quelques particules fines qui dérivent lentement, suivent le défilement
 // à des profondeurs différentes et s’écartent doucement de la souris ou du doigt.
 // Une seule toile, un sprite lumineux dessiné une fois ; pause quand l’onglet est caché.
+// Qualité allégée : moins de particules, 30 images par seconde, toile en définition simple ; essentielle : aucune.
 import { calm } from '../lib/motion-pref.js';
+import { viewBox } from '../lib/geometry.js';
+import { perfLevel, sampleFrame } from '../lib/perf.js';
 
 function sprite(color) {
   const size = 32;
@@ -34,14 +37,18 @@ export function initParticles() {
   let lastScroll = scrollY;
   let previous = performance.now();
 
+  let lastDraw = 0;
+  const sections = [...document.querySelectorAll('[data-ambient="dark"]')];
+
   const resize = () => {
-    const ratio = Math.min(2, devicePixelRatio || 1);
+    const ratio = perfLevel() === 'high' ? Math.min(1.5, devicePixelRatio || 1) : 1;
     width = innerWidth;
     height = innerHeight;
     canvas.width = width * ratio;
     canvas.height = height * ratio;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    const count = Math.round(Math.min(coarse ? 24 : 48, (width * height) / 22000));
+    const count = Math.round(Math.min(perfLevel() === 'high' ? (coarse ? 24 : 48) : 18, (width * height) / 22000));
+    particles.length = Math.min(particles.length, count);
     particles = Array.from({ length: count }, (_, index) => particles[index] || {
       x: Math.random() * width,
       y: Math.random() * height,
@@ -54,6 +61,10 @@ export function initParticles() {
   };
   resize();
   addEventListener('resize', resize);
+  addEventListener('perf:change', () => {
+    if (perfLevel() === 'min') canvas.remove();
+    else resize();
+  });
 
   const track = (x, y) => {
     pointer.x = x;
@@ -64,18 +75,21 @@ export function initParticles() {
   addEventListener('touchmove', (event) => track(event.touches[0].clientX, event.touches[0].clientY), { passive: true });
 
   function frame(now) {
-    if (document.hidden) {
-      previous = now;
+    if (perfLevel() === 'min') return;
+    if (document.hidden || (perfLevel() === 'lite' && now - lastDraw < 33)) {
+      if (document.hidden) previous = now;
       requestAnimationFrame(frame);
       return;
     }
+    lastDraw = now;
+    sampleFrame(now);
     const dt = Math.min(48, now - previous) / 16.7;
     previous = now;
     const slow = calm() ? 0.45 : 1;
     const scrolled = scrollY - lastScroll;
     lastScroll = scrollY;
     // Zones sombres à l’écran : la poussière y devient dorée et plus lumineuse.
-    const darkZones = [...document.querySelectorAll('[data-ambient="dark"]')].map((section) => section.getBoundingClientRect()).filter((rect) => rect.bottom > 0 && rect.top < height).map((rect) => [rect.top + 120, rect.bottom - 120]);
+    const darkZones = sections.map(viewBox).filter((rect) => rect.bottom > 0 && rect.top < height).map((rect) => [rect.top + 120, rect.bottom - 120]);
     const near = now < pointer.until;
     context.clearRect(0, 0, width, height);
     particles.forEach((particle) => {
@@ -113,6 +127,10 @@ export function initParticles() {
 
   // Après le chargement : la poussière n’entre pas en concurrence avec l’affichage de la page.
   const start = () => setTimeout(() => {
+    if (perfLevel() === 'min') {
+      canvas.remove();
+      return;
+    }
     canvas.classList.add('is-on');
     requestAnimationFrame(frame);
   }, 900);

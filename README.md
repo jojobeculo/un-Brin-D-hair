@@ -55,6 +55,18 @@ Sur chaque page :
 `fx.js` se charge au premier mouvement d’une souris : les téléphones ne le téléchargent pas.
 Rien ne bouge en continu pendant le chargement de la page : les orbes s’animent à la première interaction.
 
+**Qualité adaptée à la machine.** Le site mesure sa fluidité réelle dans le navigateur du visiteur
+(`assets/js/lib/perf.js`) et choisit l’un des trois niveaux suivants. Il les note sur `<html data-perf>` et
+garde le résultat pour les visites suivantes. Au départ, il part d’un indice tiré de la carte graphique.
+- `high` : tous les effets ;
+- `lite` (puce graphique intégrée, ou moins de 45 images par seconde) : sans flou d’arrière-plan ni
+  dérive des orbes, moitié moins de formes et de poussière, rubans figés au défilement ;
+- `min` (rendu sans carte graphique, ou moins de 28 images par seconde) : l’essentiel, sans ruban de
+  fond, formes ni poussière.
+
+Dans tous les cas, les animations n’interrogent jamais la mise en page pendant une image : les positions
+sont en cache (`assets/js/lib/geometry.js`).
+
 **Animations complètes ou douces.** Quand le système demande moins d’animations (sous Windows :
 *Paramètres › Accessibilité › Effets visuels › Effets d’animation* désactivé), le site passe en mode
 doux : le curseur, les rubans, les orbes, les effets de clic et de survol et le passage en sombre

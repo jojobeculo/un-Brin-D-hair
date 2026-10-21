@@ -8,6 +8,8 @@ export function initMotionToggle() {
     button.addEventListener('click', () => {
       try {
         localStorage.setItem('ubdh-animations', calm() ? 'full' : 'calm');
+        // Nouveau choix : la fluidité de la machine est mesurée à nouveau.
+        localStorage.removeItem('ubdh-perf');
       } catch {
         // Stockage bloqué : le choix vaut pour cette page seulement.
       }
